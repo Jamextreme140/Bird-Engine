@@ -8,5 +8,5 @@ latest/windows/haxe/
 .haxelib/
 pages/
 docs/doc.xml
-mods/Baldi's Basics in Funkin'/
-mods/Vs SC
+mods/*
+!mods/readme.txt

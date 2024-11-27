@@ -9,11 +9,11 @@
 	<git name="flixel-addons" url="https://github.com/FNF-CNE-Devs/flixel-addons" />
 
 	<!-- Other Libraries -->
-	<git name="hscript-improved" url="https://github.com/Jamextreme140/hscript-improved" ref="custom-classes-rework" />
+	<git name="hscript-improved" url="https://github.com/FNF-CNE-Devs/hscript-improved" ref="custom-classes" />
 	<git name="linc_luajit" url="https://github.com/superpowers04/linc_luajit" ref="master"/>
 	<git name="flxanimate" url="https://github.com/FNF-CNE-Devs/flxanimate" />
 	<git name="hxdiscord_rpc" url="https://github.com/FNF-CNE-Devs/hxdiscord_rpc" />
-	<lib name="hxvlc" skipDeps="true" />
+	<lib name="hxvlc" version="1.9.3" skipDeps="true" />
 
 	<!-- Documentation and other features -->
 	<git name="away3d" url="https://github.com/FNF-CNE-Devs/away3d" />

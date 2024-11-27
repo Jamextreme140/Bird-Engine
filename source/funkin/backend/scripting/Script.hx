@@ -58,7 +58,7 @@ class Script extends FlxBasic implements IFlxDestroyable {
 				commit: funkin.backend.system.macros.GitCommitMacro.commitNumber,
 				hash: funkin.backend.system.macros.GitCommitMacro.commitHash,
 				build: 2675, // 2675 being the last build num before it was removed
-				name: "Codename Engine"
+				name: "Bird Engine (CNE Beta)"
 			},
 			"ModState"		  => funkin.backend.scripting.ModState,
 			"ModSubState"	   => funkin.backend.scripting.ModSubState,
