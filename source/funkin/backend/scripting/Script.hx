@@ -111,7 +111,7 @@ class Script extends FlxBasic implements IFlxDestroyable {
 	public static var scriptExtensions:Array<String> = [
 		"hx", "hscript", "hsc", "hxs", "hxc",
 		"pack", // combined file
-		"lua" /** ACTUALLY NOT SUPPORTED, ONLY FOR THE MESSAGE, until now... **/
+		"lua"
 	];
 
 	/**
@@ -161,7 +161,7 @@ class Script extends FlxBasic implements IFlxDestroyable {
 						new DummyScript(path);
 					}
 					#else
-					Logs.trace("Lua not available. Use HScript instead.", ERROR);
+					Logs.trace("Lua is not supported in this engine. Use HScript instead.", ERROR);
 					new DummyScript(path);
 					#end
 				default:
@@ -181,12 +181,17 @@ class Script extends FlxBasic implements IFlxDestroyable {
 			case "hx" | "hscript" | "hsc" | "hxs" | "hxc":
 				new HScript(path).loadFromString(code);
 			case "lua":
+				#if ENABLE_LUA
 				if(useLua)
 					new LuaScript(path).loadFromString(code);
 				else {
-					Logs.trace("Lua is not supported in this engine. Use HScript instead.", ERROR);
+					Logs.trace("Lua not available. Use HScript instead.", ERROR);
 					new DummyScript(path).loadFromString(code);
 				}
+				#else
+				Logs.trace("Lua is not supported in this engine. Use HScript instead.", ERROR);
+				new DummyScript(path).loadFromString(code);
+				#end
 			default:
 				new DummyScript(path).loadFromString(code);
 		}
@@ -196,9 +201,8 @@ class Script extends FlxBasic implements IFlxDestroyable {
 	 * Creates a new instance of the script class.
 	 * @param path
 	 */
-	public function new(path:String, ?lua:Bool = false) {
+	public function new(path:String) {
 		super();
-		if(lua) return;
 		rawPath = path;
 		path = Paths.getFilenameFromLibFile(path);
 

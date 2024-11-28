@@ -9,4 +9,5 @@ latest/windows/haxe/
 pages/
 docs/doc.xml
 mods/*
+!mods/lua test/
 !mods/readme.txt

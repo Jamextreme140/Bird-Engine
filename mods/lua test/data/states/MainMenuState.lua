@@ -10,8 +10,9 @@ function postCreate()
 	bpm = getClassField('funkin.backend.system.Conductor', 'bpm')
 
 	createSprite('fabi', 'fabi');
-	fabi.x = posX
-	fabi.y = 10
+	--fabi.x = posX
+	--fabi.y = 200
+	callObjectMethod('fabi', 'setPosition', {posX, 200})
 	--setSpriteScroll('fabi')
 	fabi.scrollFactor.x = 0
 	fabi.scrollFactor.y = 0
@@ -30,6 +31,13 @@ function postCreate()
 	print("created");
 
 	print(luaText.text)
+
+	--fabi.setPosition(posX, 200);
+
+	executeScript('testScript', [[
+		trace("Hello from Lua through HScript ");
+		trace(">:3");
+	]]);
 end
 
 function beatHit(curBeat)

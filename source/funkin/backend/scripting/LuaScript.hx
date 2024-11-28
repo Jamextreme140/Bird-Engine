@@ -1,14 +1,16 @@
 package funkin.backend.scripting;
 import funkin.backend.scripting.events.CancellableEvent;
-#if ENABLE_LUA
+
 import funkin.backend.scripting.lua.*;
 
 import haxe.DynamicAccess;
 
+import openfl.utils.Assets;
+
+#if ENABLE_LUA
 import llua.State;
 import llua.Macro.*;
-
-import openfl.utils.Assets;
+import llua.LuaCallback;
 
 using llua.Lua;
 using llua.LuaL;
@@ -17,10 +19,11 @@ using llua.Convert;
 class LuaScript extends Script{
     public var state:State = null;
 	public var luaCallbacks:Map<String, Dynamic> = [];
-	public var lastStackID:Int = 0;
     public var stack:Map<Int, Dynamic> = [];
 
 	public var parent:ParentObject;
+
+	private var lastStackID:Int = 0;
 
 	public static var curLuaScript:LuaScript = null;
 	
@@ -232,8 +235,9 @@ class LuaScript extends Script{
 				ret = state.tostring(stackPos);
 			case Lua.LUA_TTABLE:
 				ret = toHaxeObj(stackPos);
-			case Lua.LUA_TFUNCTION:
-				null; // no support for functions yet
+			case Lua.LUA_TFUNCTION: // From https://github.com/DragShot/linc_luajit/
+				null;
+				//ret = new LuaCallback(state, state.ref(Lua.LUA_REGISTRYINDEX));
 			// case Lua.LUA_TUSERDATA:
 			// 	ret = LuaL.ref(l, Lua.LUA_REGISTRYINDEX);
 			// 	trace("userdata\n");
@@ -250,7 +254,7 @@ class LuaScript extends Script{
 
 
         if (ret is Dynamic && Reflect.hasField(ret, "__stack_id")) {
-            // is a "pointer"! convert it back.
+            // A Stack Pointer is referenced.
             var pos:Int = Reflect.field(ret, "__stack_id");
             return stack[pos];
         }
@@ -284,7 +288,7 @@ class LuaScript extends Script{
                 state.objectToLua(val); // {}
             default:
                 
-                var p = {
+                var p:StackPointer = {
                     __stack_id: lastStackID++,
                 };
                 state.toLua(p);
@@ -321,7 +325,7 @@ class LuaScript extends Script{
         return null;
     }
 
-    public function onPointerCall(obj:Dynamic, ...args:Any) {
+    public function onPointerCall(obj:Dynamic, ...args:Dynamic) {
         trace(obj);
         trace(args);
         if (obj != null && Reflect.isFunction(obj))
@@ -426,4 +430,10 @@ typedef ParentObject =
 	var instance:MusicBeatState;
 	var parent:Dynamic;
 }
+
+typedef StackPointer =  {
+	var __stack_id:Int;
+}
+#else
+typedef LuaScript = DummyScript;
 #end
