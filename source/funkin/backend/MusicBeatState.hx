@@ -109,6 +109,10 @@ class MusicBeatState extends FlxState implements IBeatReceiver
 		"SCRIPTS" => new Map<String, funkin.backend.scripting.HScript>()
 	];
 	#end
+
+	public static var lastScriptName:String = null;
+	public static var lastStateName:String = null;
+
 	public var scriptName:String = null;
 
 	public static var skipTransOut:Bool = false;
@@ -125,7 +129,12 @@ class MusicBeatState extends FlxState implements IBeatReceiver
 		super();
 		this.scriptsAllowed = #if SOFTCODED_STATES scriptsAllowed #else false #end;
 		this.luaScriptsAllowed = #if ENABLE_LUA luaScriptsAllowed #else false #end;
-		this.scriptName = scriptName;
+		//this.scriptName = scriptName;
+		if(lastStateName != (lastStateName = Type.getClassName(Type.getClass(this)))) {
+			lastScriptName = null;
+		}
+		this.scriptName = scriptName != null ? scriptName : lastScriptName;
+		lastScriptName = this.scriptName;
 	}
 
 	function loadScript() {
