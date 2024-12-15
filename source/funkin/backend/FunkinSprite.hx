@@ -328,6 +328,30 @@ class FunkinSprite extends FlxSkewedSprite implements IBeatReceiver implements I
 		lastAnimContext = Context;
 	}
 
+	public inline function addAnim(name:String, prefix:String, frameRate:Float = 24, ?looped:Bool, ?forced:Bool, ?indices:Array<Int>, x:Float = 0,
+			y:Float = 0, animType:XMLAnimType = NONE)
+	{
+		return XMLUtil.addAnimToSprite(this, {
+			name: name,
+			anim: prefix,
+			fps: frameRate,
+			loop: looped == null ? animType == LOOP : looped,
+			animType: animType,
+			x: x,
+			y: y,
+			indices: indices,
+			forced: forced
+		});
+	}
+
+	public inline function removeAnim(name:String)
+	{
+		if (animateAtlas != null)
+			@:privateAccess animateAtlas.anim.animsMap.remove(name);
+		else
+			animation.remove(name);
+	}
+
 	public function getAnim(name:String):OneOfTwo<FlxAnimation, FlxSymbolAnimation> {
 		if(animateAtlas != null)
 			return animateAtlas.anim.getByName(name);
@@ -341,7 +365,7 @@ class FunkinSprite extends FlxSkewedSprite implements IBeatReceiver implements I
 		return FlxPoint.weak(0, 0);
 	}
 
-	public inline function hasAnimation(AnimName:String):Bool @:privateAccess
+	public inline function hasAnim(AnimName:String):Bool @:privateAccess
 		return animateAtlas != null ? (animateAtlas.anim.animsMap.exists(AnimName)
 			|| animateAtlas.anim.symbolDictionary.exists(AnimName)) : animation.exists(AnimName);
 
@@ -364,12 +388,6 @@ class FunkinSprite extends FlxSkewedSprite implements IBeatReceiver implements I
 		return animateAtlas != null ? animateAtlas.anim.reversed : animation.curAnim != null ? animation.curAnim.reversed : false;
 	}
 
-	public inline function removeAnimation(name:String) {
-		if (animateAtlas != null)
-			@:privateAccess animateAtlas.anim.animsMap.remove(name);
-		else
-			animation.remove(name);
-	}
 
 	public inline function getNameList():Array<String> {
 		if (animateAtlas != null)
@@ -378,7 +396,7 @@ class FunkinSprite extends FlxSkewedSprite implements IBeatReceiver implements I
 			return animation.getNameList();
 	}
 
-	public inline function stopAnimation() {
+	public inline function stopAnim() {
 		if (animateAtlas != null)
 			animateAtlas.anim.pause();
 		else
@@ -394,6 +412,11 @@ class FunkinSprite extends FlxSkewedSprite implements IBeatReceiver implements I
 		return animateAtlas != null ? animateAtlas.anim.isAtEnd : (animation.curAnim != null ? animation.curAnim.isAtEnd : false);
 	}
 	#end
+
+	// Backwards compat (the names used to be all different and it sucked, please lets use the same format in the future)  - Nex
+	public inline function hasAnimation(AnimName:String) return hasAnim(AnimName);
+	public inline function removeAnimation(name:String) return removeAnim(name);
+	public inline function stopAnimation() return stopAnim();
 
 	// Getter / Setters
 
