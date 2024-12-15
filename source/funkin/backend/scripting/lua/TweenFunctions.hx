@@ -76,7 +76,7 @@ final class TweenFunctions {
 		];
 	}
 	
-	public static function getNotITGTweenFunctions(instance:MusicBeatState, ?script:Script):Map<String, Dynamic> {
+	public static function getModchartFunctions(instance:MusicBeatState, ?script:Script):Map<String, Dynamic> {
 		if(!(instance is PlayState)) return null;
 		return [
 			"tweenNote" => function(tweenName:String, strumLine:Int, note:Int, property:String, value:Dynamic, duration:Float, ease:String, type:String, timeDelayed:Float = 0.0) {

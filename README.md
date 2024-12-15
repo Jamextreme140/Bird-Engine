@@ -8,8 +8,8 @@ Originally used on FNF Vs SC. This custom engine includes the following features
 
 - Full Lua Script support (non-Psych)
     - Gameplay Scripting
-	- Customizable States
-    - Custom States
+	- Customizable States (and Custom States too)
+    - Modchart system (soon...)
 	- NDLL management (WIP)
 
 **NOTE**: Due to the limited Lua flexibility, do not consider it as a Scripting replacement, but as a complement. Remember that the main scripting system of this engine is HScript.

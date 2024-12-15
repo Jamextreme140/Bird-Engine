@@ -16,6 +16,10 @@ using llua.Lua;
 using llua.LuaL;
 using llua.Convert;
 
+/**
+ * Based on code from Codename Engine "lua-test" branch
+ * @see https://github.com/CodenameCrew/CodenameEngine/blob/lua-test/source/funkin/scripting/LuaScript.hx
+ */
 class LuaScript extends Script{
     public var state:State = null;
 	public var luaCallbacks:Map<String, Dynamic> = [];
@@ -56,6 +60,8 @@ class LuaScript extends Script{
 		Lua.register_hxtrace_func(cpp.Callable.fromStaticFunction(print_function));
 		state.register_hxtrace_lib();
 
+		onPointerCall = Reflect.makeVarArgs(pointerCall);
+
 		luaCallbacks["__onPointerIndex"] = onPointerIndex;
         luaCallbacks["__onPointerNewIndex"] = onPointerNewIndex;
         luaCallbacks["__onPointerCall"] = onPointerCall;
@@ -88,7 +94,9 @@ class LuaScript extends Script{
         var code = Assets.getText(path);
 		if(code != null && code.trim() != "") {
 			if (state.dostring(code) != 0)
-            this.error('${state.tostring(-1)}');
+				this.error('${state.tostring(-1)}');
+			else
+				this.call('new', []);
 		}
     }
 
@@ -129,7 +137,7 @@ class LuaScript extends Script{
 			for(k=>e in LuaPlayState.getPlayStateFunctions(this)) {
 				addCallback(k, e);
 			}
-			for(k=>e in TweenFunctions.getNotITGTweenFunctions(parent.instance, this)) {
+			for(k=>e in TweenFunctions.getModchartFunctions(parent.instance, this)) {
 				addCallback(k, e);
 			}
 			
@@ -325,11 +333,12 @@ class LuaScript extends Script{
         return null;
     }
 
-    public function onPointerCall(obj:Dynamic, ...args:Dynamic) {
-        trace(obj);
-        trace(args);
+	public var onPointerCall:Dynamic;
+
+    private function pointerCall(args:Array<Dynamic>) {
+		var obj = args.shift(); //Retrieves the referenced object
         if (obj != null && Reflect.isFunction(obj))
-            return Reflect.callMethod(null, obj, args.toArray());
+            return Reflect.callMethod(null, obj, args);
         return null;
     }
 

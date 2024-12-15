@@ -21,7 +21,7 @@ function postCreate()
 
 	print("created");
 
-	print(getField("camGame.flashSprite.scaleX"))
+	--print(getField("camGame.flashSprite.scaleX"))
 
 	for i=0,1 do
 		for j=1,4 do

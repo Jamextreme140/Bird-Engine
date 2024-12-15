@@ -4,6 +4,10 @@ local ab = 0.005
 local ab1 = 0.0008
 local bpm
 
+function new()
+	print('"new" constructor :3')
+end
+
 function postCreate()
 	print("prePost")
 
@@ -12,7 +16,8 @@ function postCreate()
 	createSprite('fabi', 'fabi');
 	--fabi.x = posX
 	--fabi.y = 200
-	callObjectMethod('fabi', 'setPosition', {posX, 200})
+	--callObjectMethod('fabi', 'setPosition', {posX, 200})
+	fabi.setPosition(posX, 200);
 	--setSpriteScroll('fabi')
 	fabi.scrollFactor.x = 0
 	fabi.scrollFactor.y = 0
@@ -29,10 +34,6 @@ function postCreate()
 	addShader('default', 'chromaticAberration')
 
 	print("created");
-
-	print(luaText.text)
-
-	--fabi.setPosition(posX, 200);
 
 	executeScript('testScript', [[
 		trace("Hello from Lua through HScript ");
