@@ -90,6 +90,6 @@ function onChangeItem(event)
 end
 ```
 
-There's a lot of other events tha will be soon documented...
+There's a lot of other events that will be soon documented...
 
 Despite all of that, functions like `update`, `beatHit`, `stepHit` still receive one parameter (`elapsed`, `curBeat` and `curStep`)
