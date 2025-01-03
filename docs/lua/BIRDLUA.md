@@ -13,7 +13,7 @@ Just like in hscript you have to create a script, the filename has to end with a
 
 And like in hscript, scripting relies heavily on having a console opened at all times in order to track down error and bugs with your script. To access to it, press F2 to open the console or start the game in a CMD or powershell window (or in terminal for linux/mac users) making sure that you are in the correct working folder (open the terminal by doing right click and pressing `Open with Terminal` or directly opening the terminal and typing `cd C:\Users\you\Documents\Bird Engine` depending on wherever you have the engine folder placed on).
 
-## This Lua system can access to sprites variables through "dot-like" syntax
+## This Lua system can access to sprites/shaders variables through "dot-like" syntax
 
 Doing things like `sprite.x`, `shader.iTime = time`, `sprite.scrollFactor.x = 0` and `sprite.setPosition(10, 10)` are possible in this Lua System.
 Using those is beneficial as they prove to be an alternative to using callbacks for calling functions and changing their values, also it helps programmers to become familiar with hscript syntax.
