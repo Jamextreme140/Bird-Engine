@@ -93,6 +93,11 @@ class ModsFolder {
 	public static function getModsList():Array<String> {
 		var mods:Array<String> = [];
 		#if MOD_SUPPORT
+		final modsList:Array<String> = FileSystem.readDirectory(modsPath);
+
+		if (modsList == null || modsList.length <= 0)
+			return mods;
+		
 		for(modFolder in FileSystem.readDirectory(modsPath)) {
 			if (FileSystem.isDirectory('${modsPath}${modFolder}')) {
 				mods.push(modFolder);

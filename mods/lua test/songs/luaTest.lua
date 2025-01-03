@@ -16,8 +16,8 @@ function postCreate()
 
 	createText('luaText', 'Bird Engine', posX + 50, 90, 0, 27, 'camHUD')
 	addSprite('luaText', 'camHUD')
-	initShader('chromaticAberration')
-	addShader('camGame', 'chromaticAberration')
+	initShader('chrom', 'chromaticAberration')
+	addShader('camGame', 'chrom')
 
 	print("created");
 
@@ -67,12 +67,16 @@ function beatHit(curBeat)
 	if(math.fmod(curBeat, 2) == 0 and not hasTween) then
 		--print(curBeat)
 		shake('camHUD', 0.01, 0.1)
-		setShaderField('chromaticAberration', 'redOff', {ab1, 0})
-		setShaderField('chromaticAberration', 'blueOff', {-ab1, 0})
+		--setShaderField('chrom', 'redOff', {ab1, 0})
+		--setShaderField('chrom', 'blueOff', {-ab1, 0})
+		chrom.redOff = {ab1, 0}
+		chrom.blueOff = {-ab1, 0}
 		hasTween = true
 	elseif(math.fmod(curBeat, 4) == 0 and hasTween) then
-		setShaderField('chromaticAberration', 'redOff', {ab, 0})
-		setShaderField('chromaticAberration', 'blueOff', {-ab, 0})
+		--setShaderField('chrom', 'redOff', {ab, 0})
+		--setShaderField('chrom', 'blueOff', {-ab, 0})
+		chrom.redOff = {ab, 0}
+		chrom.blueOff = {-ab, 0}
 		hasTween = false
 	end
 

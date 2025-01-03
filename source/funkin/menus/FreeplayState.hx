@@ -3,6 +3,7 @@ package funkin.menus;
 import funkin.backend.scripting.lua.LuaTools;
 import funkin.backend.chart.Chart;
 import funkin.backend.chart.ChartData.ChartMetaData;
+import funkin.backend.system.Conductor;
 import haxe.io.Path;
 import openfl.text.TextField;
 import flixel.text.FlxText;
@@ -240,7 +241,11 @@ class FreeplayState extends MusicBeatState
 		autoplayElapsed += elapsed;
 		if (!disableAutoPlay && !songInstPlaying && (autoplayElapsed > timeUntilAutoplay || FlxG.keys.justPressed.SPACE)) {
 			if (curPlayingInst != (curPlayingInst = Paths.inst(songs[curSelected].name, songs[curSelected].difficulties[curDifficulty]))) {
-				var huh:Void->Void = function() FlxG.sound.playMusic(curPlayingInst, 0);
+				var huh:Void->Void = function()
+				{
+					FlxG.sound.playMusic(curPlayingInst, 0);
+					Conductor.changeBPM(songs[curSelected].bpm, songs[curSelected].beatsPerMeasure, songs[curSelected].stepsPerBeat);
+				}
 				if(!disableAsyncLoading) Main.execAsync(huh);
 				else huh();
 			}

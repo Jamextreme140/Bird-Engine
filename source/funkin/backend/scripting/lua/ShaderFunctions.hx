@@ -1,12 +1,11 @@
 package funkin.backend.scripting.lua;
 #if ENABLE_LUA
-import funkin.backend.shaders.CustomShader;
 import funkin.backend.scripting.lua.shaders.LuaShader;
 
 final class ShaderFunctions {
 	public static function getShaderFunctions(instance:MusicBeatState, ?script:Script):Map<String, Dynamic> {
 		return [
-			"initShader" => function(name:String, ?glslVersion:Int = 120) {
+			"initShader" => function(name:String, shader:String, ?glslVersion:Int = 120) {
 				if(!Options.gameplayShaders) return;
 
 				if(instance.luaObjects["SHADER"].exists(name)) {
@@ -14,7 +13,7 @@ final class ShaderFunctions {
 					return;
 				}
 
-				var cShader = new LuaShader(name, Std.string(glslVersion));
+				var cShader = new LuaShader(shader, Std.string(glslVersion));
 
 				instance.luaObjects["SHADER"].set(name, cShader);
 				cast(script, LuaScript).set(name, cShader);

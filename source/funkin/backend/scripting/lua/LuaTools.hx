@@ -108,11 +108,26 @@ class LuaTools {
 		else if(instance.luaObjects["TEXT"].exists(name)) {
 			object = instance.luaObjects["TEXT"].get(name);
 		}
+		else if(instance.luaObjects["VIDEOS"].exists(name)) {
+			object = instance.luaObjects["VIDEOS"].get(name);
+		}
 		else if(object == null) {
 			object = Reflect.getProperty(instance, name);
 		}
 
 		return object;
+	}
+
+	public static function removeLuaObject(instance:MusicBeatState, name:String) {
+		if(instance.luaObjects["SPRITE"].exists(name)) {
+			instance.luaObjects["SPRITE"].remove(name);
+		}
+		else if(instance.luaObjects["TEXT"].exists(name)) {
+			instance.luaObjects["TEXT"].remove(name);
+		}
+		else if(instance.luaObjects["VIDEOS"].exists(name)) {
+			instance.luaObjects["VIDEOS"].remove(name);
+		}
 	}
 
 	public static function getEase(?ease:String = '')
@@ -169,7 +184,7 @@ class LuaTools {
 	}
 
 	public static function getColor(color:Dynamic):FlxColor {
-		return CoolUtil.getDefault(CoolUtil.getColorFromDynamic(color), FlxColor.BLACK);
+		return CoolUtil.getColorFromDynamic(color).getDefault(FlxColor.BLACK);
 	}
 	#end
 }

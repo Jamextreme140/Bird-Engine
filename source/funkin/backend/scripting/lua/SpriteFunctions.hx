@@ -1,8 +1,10 @@
 package funkin.backend.scripting.lua;
 
-import flixel.text.FlxText.FlxTextBorderStyle;
+import flixel.util.FlxColor;
 import flixel.text.FlxText;
-import funkin.game.PlayState;
+
+import funkin.backend.scripting.events.PlayAnimEvent.PlayAnimContext;
+import funkin.game.Character;
 
 final class SpriteFunctions {
 	
@@ -31,7 +33,7 @@ final class SpriteFunctions {
 			},
 			"setText" => function(name:String, text:String = '') {
 				var yourText:FunkinText = LuaTools.getObject(instance, name);
-				if(yourText != null){
+				if(yourText != null && yourText is FlxText){
 					yourText.text = text;
 				}
 			},
@@ -65,8 +67,22 @@ final class SpriteFunctions {
 					sprite = PlayState.instance.luaObjects["SPRITE"].get(name);
 				*/
 				if(sprite != null) {
+					if(!sprite.alive && !sprite.exists) //Check if it was removed, but not destroyed
+						sprite.revive();
 					instance.add(sprite);
 					sprite.cameras = [LuaTools.getCamera(camera)];
+				}
+			},
+			"removeSprite" => function(name:String, destroy:Bool = true) {
+				var sprite:FlxSprite = LuaTools.getObject(instance, name);
+
+				if(sprite != null) {
+					sprite.kill();
+					instance.remove(sprite, true);
+					if(destroy) {
+						sprite.destroy();
+						LuaTools.removeLuaObject(instance, name);
+					}
 				}
 			},
 			"setSpriteCamera" => function(name:String, ?camera:String = 'default') {
@@ -110,11 +126,15 @@ final class SpriteFunctions {
 			},
 			"setSpriteColor" => function(name:String, ?r:Float = 1, ?g:Float = 1, ?b:Float = 1) {
 				var sprite:FlxSprite = LuaTools.getObject(instance, name);
+				var newColor:FlxColor = FlxColor.fromRGBFloat(r, g, b);
 
 				if(sprite != null) {
+					/*
 					sprite.colorTransform.redMultiplier = r;
 					sprite.colorTransform.greenMultiplier = g;
 					sprite.colorTransform.blueMultiplier = b;
+					*/
+					sprite.color = newColor;
 				}
 			},
 			"setSpriteColorOffset" => function(name:String, ?r:Float = 0, ?g:Float = 0, ?b:Float = 0) {
@@ -124,6 +144,106 @@ final class SpriteFunctions {
 					sprite.colorTransform.redOffset = r;
 					sprite.colorTransform.greenOffset = g;
 					sprite.colorTransform.blueOffset = b;
+				}
+			}
+		];
+	}
+
+	public static function getAnimatedSpriteFunctions(instance:MusicBeatState, ?script:Script):Map<String, Dynamic>
+	{
+		return [
+			"createAnimatedSprite" => function(name:String, ?imagePath:String, ?x:Float = 0, ?y:Float = 0) {
+				if (instance.luaObjects["SPRITE"].exists(name))
+					return;
+
+				var theSprite:FunkinSprite = new FunkinSprite(x, y);
+				if (imagePath != null && imagePath.length > 0)
+					theSprite.loadSprite(imagePath);
+				instance.luaObjects["SPRITE"].set(name, theSprite);
+				cast(script, LuaScript).set(name, theSprite);
+			},
+			"addAnimationByPrefix" => function(name:String, anim:String, prefix:String, framerate:Int = 24, forced:Bool = false, type:String = 'none') {
+				if (instance.luaObjects["SPRITE"].exists(name))
+				{
+					var sprite:FunkinSprite = LuaTools.getObject(instance, name);
+
+					var animType:XMLAnimType = switch (type.toLowerCase())
+					{
+						case 'beat': XMLAnimType.BEAT;
+						case 'loop' | 'looped': XMLAnimType.LOOP;
+						default: XMLAnimType.NONE;
+					}
+
+					sprite.addAnim(anim, prefix, framerate, null, forced, animType);
+				}
+			},
+			"addAnimationByIndices" => function(name:String, anim:String, prefix:String, indices:String, framerate:Int = 24, forced:Bool = false, type:String = 'none') {
+				if (instance.luaObjects["SPRITE"].exists(name))
+				{
+					var sprite:FunkinSprite = LuaTools.getObject(instance, name);
+
+					var animType:XMLAnimType = switch (type.toLowerCase())
+					{
+						case 'beat': XMLAnimType.BEAT;
+						case 'loop' | 'looped': XMLAnimType.LOOP;
+						default: XMLAnimType.NONE;
+					}
+
+					var strIndices:Array<String> = indices.trim().split(',');
+					var inds:Array<Int> = [];
+					for (indice in strIndices)
+						inds.push(Std.parseInt(indice));
+
+					sprite.addAnim(anim, prefix, framerate, null, forced, inds, animType);
+				}
+			},
+			"addOffset" => function(name:String, anim:String, x:Float = 0.0, y:Float = 0.0) {
+				if (instance.luaObjects["SPRITE"].exists(name)) {
+					var sprite:FunkinSprite = LuaTools.getObject(instance, name);
+
+					sprite.addOffset(anim, x, y);
+				}
+				else {
+					var sprite:FlxSprite = LuaTools.getObject(instance, name);
+
+					if (sprite != null) {
+						if (sprite is FunkinSprite)
+						{
+							cast(sprite, FunkinSprite).addOffset(anim, x, y);
+						}
+					}
+				}
+			},
+			"playAnim" => function(name:String, anim:String, forced:Bool = false, reverse:Bool = false, initFrame:Int = 0, context:String = 'none') {
+				var animContext:PlayAnimContext = switch (context.toLowerCase())
+				{
+					case 'sing' | 'singing': SING;
+					case 'dance' | 'dancing': DANCE;
+					case 'miss' | 'missed': MISS;
+					case 'lock' | 'locked': LOCK;
+					default: NONE;
+				}
+
+				if (instance.luaObjects["SPRITE"].exists(name))
+				{
+					var sprite:FunkinSprite = LuaTools.getObject(instance, name);
+
+					if (sprite.hasAnim(anim))
+						sprite.playAnim(anim, forced, animContext, reverse, initFrame);
+				}
+				else
+				{
+					var sprite:FlxSprite = LuaTools.getObject(instance, name);
+
+					if (sprite != null)
+					{
+						if (sprite is Character)
+						{
+							cast(sprite, Character).playAnim(anim, forced, animContext, reverse, initFrame);
+						}
+						else if (sprite.animation.exists(anim))
+							sprite.animation.play(anim, forced, reverse, initFrame);
+					}
 				}
 			}
 		];

@@ -106,6 +106,7 @@ class MusicBeatState extends FlxState implements IBeatReceiver
 		"SHADER" => new Map<String, funkin.backend.shaders.FunkinShader>(),
 		"TIMERS" => new Map<String, flixel.util.FlxTimer>(),
 		"SOUNDS" => new Map<String, flixel.sound.FlxSound>(),
+		"VIDEOS" => new Map<String, hxvlc.flixel.FlxVideoSprite>(),
 		"SCRIPTS" => new Map<String, funkin.backend.scripting.HScript>()
 	];
 	#end

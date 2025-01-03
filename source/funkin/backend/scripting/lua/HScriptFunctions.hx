@@ -1,6 +1,7 @@
 package funkin.backend.scripting.lua;
 
 class HScriptFunctions {
+	//TODO: turn the hscript thing into a singleton
 	public static function getHScriptFunctions(?instance:MusicBeatState, ?script:Script):Map<String, Dynamic> {
 		#if ENABLE_LUA
 		return [

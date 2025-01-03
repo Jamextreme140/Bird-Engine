@@ -69,6 +69,23 @@ class MusicBeatSubstate extends FlxSubState implements IBeatReceiver
 
 	public var scriptName:String = null;
 
+	@:unreflective public var luaScriptsAllowed:Bool = true;
+	#if ENABLE_LUA
+	/**
+	 * Map containing all the objects created from Lua
+	 */
+	@:unreflective public var luaObjects(default, never):Map<String, Map<String, Dynamic>> = [
+		"SPRITE" => new Map<String, flixel.FlxSprite>(),
+		"TEXT" => new Map<String, flixel.FlxSprite>(),
+		"TWEEN" => new Map<String, flixel.tweens.FlxTween>(),
+		"SHADER" => new Map<String, funkin.backend.shaders.FunkinShader>(),
+		"TIMERS" => new Map<String, flixel.util.FlxTimer>(),
+		"SOUNDS" => new Map<String, flixel.sound.FlxSound>(),
+		"VIDEOS" => new Map<String, hxvlc.flixel.FlxVideoSprite>(),
+		"SCRIPTS" => new Map<String, funkin.backend.scripting.HScript>()
+	];
+	#end
+
 	/**
 	 * Game Controls. (All players / Solo)
 	 */

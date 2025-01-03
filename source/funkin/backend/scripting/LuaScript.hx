@@ -1,11 +1,13 @@
 package funkin.backend.scripting;
-import funkin.backend.scripting.events.CancellableEvent;
 
+import funkin.backend.scripting.events.CancellableEvent;
 import funkin.backend.scripting.lua.*;
 
 import haxe.DynamicAccess;
 
 import openfl.utils.Assets;
+
+import hscript.IHScriptCustomBehaviour;
 
 #if ENABLE_LUA
 import llua.State;
@@ -56,7 +58,7 @@ class LuaScript extends Script{
 
         state = LuaL.newstate();
 		Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(callback_handler));
-		LuaL.openlibs(state);
+		state.openlibs();
 		Lua.register_hxtrace_func(cpp.Callable.fromStaticFunction(print_function));
 		state.register_hxtrace_lib();
 
@@ -328,8 +330,13 @@ class LuaScript extends Script{
     }
 
     public function onPointerIndex(obj:Dynamic, key:String) {
-		if (obj != null)
-            return Reflect.getProperty(obj, key);
+		if (obj != null) {
+			if(obj is IHScriptCustomBehaviour)
+				return cast(obj, IHScriptCustomBehaviour).hget(key);
+			else 
+				return Reflect.getProperty(obj, key);
+		}
+		 
         return null;
     }
 
@@ -345,8 +352,13 @@ class LuaScript extends Script{
     public function onPointerNewIndex(obj:Dynamic, key:String, val:Dynamic) {
 		if (key == "__gc") return null;
 
-        if (obj != null)
-            Reflect.setProperty(obj, key, val);
+        if (obj != null) {
+			if(obj is IHScriptCustomBehaviour)
+				cast(obj, IHScriptCustomBehaviour).hset(key, val);
+			else
+            	Reflect.setProperty(obj, key, val);
+		}
+
         return null;
     }
 

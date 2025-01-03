@@ -1,12 +1,9 @@
 package funkin.backend.scripting.lua;
 #if ENABLE_LUA
-import funkin.backend.assets.ModsFolder;
 import funkin.backend.system.Conductor;
 import funkin.backend.scripting.lua.LuaTools;
 import funkin.backend.chart.ChartData.ChartEvent;
 import funkin.game.PlayState;
-import funkin.options.Options;
-import flixel.util.typeLimit.OneOfThree;
 import flixel.FlxG;
 
 final class LuaPlayState {
@@ -80,7 +77,7 @@ final class LuaPlayState {
 		return [
 			"startCutscene" => function(prefix:String, ?cutsceneScriptPath:String) {
 				PlayState.instance.startCutscene(prefix, cutsceneScriptPath, () -> {
-					PlayState.instance.scripts.luaCall("onStartCutscene", []);
+					PlayState.instance.scripts.luaCall("onStartCutscene", [prefix]);
 				});
 			},
 			"callFunction" => function(func:String, ?args:Array<Dynamic>) {
