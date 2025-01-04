@@ -1,5 +1,6 @@
 # Friday Night Funkin' - Bird Engine
-## DISCLAIMER - THIS IS A SUB-ENGINE OF [CODENAME ENGINE](https://github.com/CodenameCrew/CodenameEngine)
+
+![BirdEngine_banner](https://github.com/user-attachments/assets/00806e96-798e-4c40-8867-c2fd21d06ade)
 
 Originally used on FNF Vs SC. This custom engine includes the following features
 
@@ -20,6 +21,8 @@ Known issues in the beta:
 Build instructions are below. Press TAB on the main menu to switch mods.
 
 Also, the command `.\bird test` uses the source assets folder instead of the export one for easier development (Although you can still use `lime test windows` normally).
+
+## DISCLAIMER - THIS IS A SUB-ENGINE OF [CODENAME ENGINE](https://github.com/CodenameCrew/CodenameEngine)
 
 ### Original Engine Info
 
