@@ -89,7 +89,7 @@ final class LuaPlayState {
 				PlayState.instance.executeEvent(event);
 			},
 			"shake" => function(camera:String, ?amount:Float = 0.05, ?time:Float = 0.5) {
-				LuaTools.getCamera(camera.toLowerCase()).shake(amount, time);
+				LuaTools.getCamera(camera.toLowerCase(), PlayState.instance).shake(amount, time);
 			}
 		];
 	}

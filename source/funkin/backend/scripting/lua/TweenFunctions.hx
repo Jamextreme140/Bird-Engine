@@ -7,7 +7,7 @@ final class TweenFunctions {
 	
 	public static function getTweenFunctions(instance:MusicBeatState, ?script:Script):Map<String, Dynamic> {
 		return [
-			"tween" 	=> function(tweenName:String, object:String, property:String, value:Dynamic, duration:Float, ease:String, type:String, timeDelayed:Float = 0.0) {
+			"tween" 	=> function(tweenName:String, object:String, property:String, value:Dynamic, duration:Float, ?ease:String = 'linear', ?type:String = 'oneshot', ?timeDelayed:Float = 0.0) {
 				var obj = object.split(".");
 				var objectToTween:Dynamic = LuaTools.getObject(instance, obj[0]);
 				// Ex: tween("invert", "camHUD.flashSprite", "scaleX", getField("camHUD", "flashSprite.scaleX") * -1, 0.5)
@@ -39,14 +39,14 @@ final class TweenFunctions {
 						script.call('onTweenUpdate', [tweenName, _.executions]);
 					},
 					onComplete: (_) -> {
+						script.call('onTweenFinished', [tweenName]);
 						// Prevents removing itself on "Loop" tween type (LOOPING, PINGPONG or PERSIST)
 						if(_.type == FlxTweenType.ONESHOT || _.type == FlxTweenType.BACKWARD)
 							instance.luaObjects["TWEEN"].remove(tweenName);
-						script.call('onTweenFinished', [tweenName]);
 					}
 				}));
 			},
-			"valueTween" => function(tweenName:String, startValue:Float, endValue:Float, duration:Float, ease:String, type:String, timeDelayed:Float = 0.0) {
+			"valueTween" => function(tweenName:String, startValue:Float, endValue:Float, duration:Float, ?ease:String = 'linear', ?type:String = 'oneshot', ?timeDelayed:Float = 0.0) {
 				instance.luaObjects["TWEEN"].set(tweenName, FlxTween.num(startValue, endValue, duration, 
 				{
 					ease: LuaTools.getEase(ease), 
@@ -56,10 +56,10 @@ final class TweenFunctions {
 						script.call('onTweenUpdate', [tweenName, _.executions]);
 					},
 					onComplete: (_) -> {
+						script.call('onTweenFinished', [tweenName]);
 						// Prevents removing itself on "Loop" tween type (LOOPING, PINGPONG or PERSIST)
 						if(_.type == FlxTweenType.ONESHOT || _.type == FlxTweenType.BACKWARD)
 							instance.luaObjects["TWEEN"].remove(tweenName);
-						script.call('onTweenFinished', [tweenName]);
 					}
 				},
 				function(value:Float) {
@@ -79,7 +79,7 @@ final class TweenFunctions {
 	public static function getModchartFunctions(instance:MusicBeatState, ?script:Script):Map<String, Dynamic> {
 		if(!(instance is PlayState)) return null;
 		return [
-			"tweenNote" => function(tweenName:String, strumLine:Int, note:Int, property:String, value:Dynamic, duration:Float, ease:String, type:String, timeDelayed:Float = 0.0) {
+			"tweenNote" => function(tweenName:String, strumLine:Int, note:Int, property:String, value:Dynamic, duration:Float, ?ease:String = 'linear', ?type:String = 'oneshot', ?timeDelayed:Float = 0.0) {
 				var strumlineToUse:funkin.game.StrumLine = PlayState.instance.strumLines.members[strumLine];
 				var propertyToUse = {};
 				if(strumlineToUse == null) return;
@@ -89,8 +89,6 @@ final class TweenFunctions {
 					case 'y': propertyToUse = {y: value};
 					case 'alpha' : propertyToUse = {alpha: value};
 					case 'angle' : propertyToUse = {angle: value};
-					case 'skew.x' : propertyToUse = {"skew.x": value};
-					case 'skew.y' : propertyToUse = {"skew.y": value};
 					default: Reflect.setField(propertyToUse, property, value);
 				};
 
@@ -109,10 +107,10 @@ final class TweenFunctions {
 					},
 					onComplete: (_) ->
 					{
+						script.call('onTweenFinished', [tweenName]);
 						// Prevents removing itself on "Loop" tween type (LOOPING, PINGPONG or PERSIST)
 						if (_.type == FlxTweenType.ONESHOT || _.type == FlxTweenType.BACKWARD)
 							instance.luaObjects["TWEEN"].remove(tweenName);
-						script.call('onTweenFinished', [tweenName]);
 					}
 				}));
 			}

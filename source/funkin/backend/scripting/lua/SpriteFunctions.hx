@@ -27,7 +27,7 @@ final class SpriteFunctions {
 				
 				var yourText:FunkinText = new FunkinText(x, y, width, text, size);
 				yourText.scrollFactor.set();
-				yourText.cameras = [LuaTools.getCamera(camera)];
+				yourText.cameras = [LuaTools.getCamera(camera, instance)];
 				instance.luaObjects["TEXT"].set(name, yourText);
 				cast(script, LuaScript).set(name, yourText);
 			},
@@ -37,7 +37,7 @@ final class SpriteFunctions {
 					yourText.text = text;
 				}
 			},
-			"setTextStyle" => function(name:String, borderStyle:String, ?size:Float = 1, ?color:Dynamic) {
+			"setTextStyle" => function(name:String, borderStyle:String = 'none', ?size:Float = 1, ?color:Dynamic) {
 				var borderStyle:FlxTextBorderStyle = switch(borderStyle.toLowerCase().trim()) {
 					case "shadow":
 						SHADOW;
@@ -52,7 +52,7 @@ final class SpriteFunctions {
 				};
 
 				if(borderStyle == null) {
-					return;
+					borderStyle = NONE;
 				}
 
 				var text = LuaTools.getObject(instance, name);
@@ -70,7 +70,7 @@ final class SpriteFunctions {
 					if(!sprite.alive && !sprite.exists) //Check if it was removed, but not destroyed
 						sprite.revive();
 					instance.add(sprite);
-					sprite.cameras = [LuaTools.getCamera(camera)];
+					sprite.cameras = [LuaTools.getCamera(camera, instance)];
 				}
 			},
 			"removeSprite" => function(name:String, destroy:Bool = true) {
@@ -92,10 +92,10 @@ final class SpriteFunctions {
 					sprite = PlayState.instance.luaObjects["SPRITE"].get(name);
 				*/
 				if(sprite != null) {
-					sprite.cameras = [LuaTools.getCamera(camera)];
+					sprite.cameras = [LuaTools.getCamera(camera, instance)];
 				}
 			},
-			"setSpriteScale" => function(name:String, ?scaleX:Float = 1, ?scaleY:Float = 1) {
+			"setSpriteScale" => function(name:String, ?scaleX:Float = 1, ?scaleY:Float = 1, ?updateHitbox:Bool = true) {
 				var sprite:FlxSprite = LuaTools.getObject(instance, name);
 				/*
 				if(PlayState.instance.luaObjects["SPRITE"].exists(name))
@@ -103,10 +103,10 @@ final class SpriteFunctions {
 				*/
 				if(sprite != null) {
 					sprite.scale.set(scaleX, scaleY);
-					sprite.updateHitbox();
+					if(updateHitbox) sprite.updateHitbox();
 				}
 			},
-			"setSpriteSize" => function(name:String, ?width:Int = 0, ?height:Int = 0) {
+			"setSpriteSize" => function(name:String, ?width:Int = 0, ?height:Int = 0, ?updateHitbox:Bool = true) {
 				var sprite:FlxSprite = LuaTools.getObject(instance, name);
 				/*
 				if(PlayState.instance.luaObjects["SPRITE"].exists(name))
@@ -114,7 +114,7 @@ final class SpriteFunctions {
 				*/
 				if(sprite != null) {
 					sprite.setGraphicSize(width, height);
-					sprite.updateHitbox();
+					if(updateHitbox) sprite.updateHitbox();
 				}
 			},
 			"setSpriteScroll" => function(name:String, ?scrollX:Int = 0, ?scrollY:Int = 0) {
@@ -124,9 +124,9 @@ final class SpriteFunctions {
 					sprite.scrollFactor.set(scrollX, scrollY);
 				}
 			},
-			"setSpriteColor" => function(name:String, ?r:Float = 1, ?g:Float = 1, ?b:Float = 1) {
+			"setSpriteColor" => function(name:String, color:Dynamic) {
 				var sprite:FlxSprite = LuaTools.getObject(instance, name);
-				var newColor:FlxColor = FlxColor.fromRGBFloat(r, g, b);
+				var newColor:FlxColor = LuaTools.getColor(color);
 
 				if(sprite != null) {
 					/*
@@ -189,12 +189,7 @@ final class SpriteFunctions {
 						default: XMLAnimType.NONE;
 					}
 
-					var strIndices:Array<String> = indices.trim().split(',');
-					var inds:Array<Int> = [];
-					for (indice in strIndices)
-						inds.push(Std.parseInt(indice));
-
-					sprite.addAnim(anim, prefix, framerate, null, forced, inds, animType);
+					sprite.addAnim(anim, prefix, framerate, null, forced, CoolUtil.parseNumberRange(indices), animType);
 				}
 			},
 			"addOffset" => function(name:String, anim:String, x:Float = 0.0, y:Float = 0.0) {

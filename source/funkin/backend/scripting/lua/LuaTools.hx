@@ -13,11 +13,21 @@ class LuaTools {
 		#end
 	}
 
-	public static function getCamera(camera:String):FlxCamera {
+	public static function getCamera(camera:String, ?instance:MusicBeatState):FlxCamera {
 		return switch(camera.trim().toLowerCase()) {
 			case "camgame" | "game": PlayState.instance.camGame;
 			case "camhud" | "hud": PlayState.instance.camHUD;
-			default: FlxG.cameras.list[FlxG.cameras.list.length - 1];
+			default: 
+				if(instance != null) {
+					var aCamera:FlxCamera = instance.luaObjects["CAMERA"].get(camera);
+					if(aCamera != null)
+						return aCamera
+					else
+						return Reflect.field(instance, camera) ?? FlxG.cameras.list[FlxG.cameras.list.length - 1];
+				}
+				else {
+					return FlxG.cameras.list[FlxG.cameras.list.length - 1];
+				}
 		}
 	}
 

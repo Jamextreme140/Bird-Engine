@@ -26,14 +26,14 @@ class LuaScript extends Script{
     public var state:State = null;
 	public var luaCallbacks:Map<String, Dynamic> = [];
     public var stack:Map<Int, Dynamic> = [];
-
+	// BIG TODO: make substates work
 	public var parent:ParentObject;
 
 	private var lastStackID:Int = 0;
 
 	public static var curLuaScript:LuaScript = null;
 	
-	public function new(path:String) {
+	public function new(path:String, ?fromSubstate:Bool = false) {
 		parent = {
 			instance: cast(FlxG.state, MusicBeatState),
 			parent: cast(FlxG.state, MusicBeatState)
@@ -164,6 +164,12 @@ class LuaScript extends Script{
 			addCallback(k, e);
 		}
 		for(k=>e in SoundFunctions.getSoundFunctions(parent.instance, this)){
+			addCallback(k, e);
+		}
+		for(k=>e in VideoFunctions.getVideoFunctions(parent.instance, this)){
+			addCallback(k, e);
+		}
+		for(k=>e in CameraFunctions.getCameraFunctions(parent.instance, this)){
 			addCallback(k, e);
 		}
 		#if NDLLS_SUPPORTED
