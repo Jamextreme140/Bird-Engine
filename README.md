@@ -4,13 +4,10 @@
 
 Originally used on FNF Vs SC. This custom engine includes the following features
 
-- Modchart aggregates
-	- Skewable notes
-
 - Full Lua Script support (non-Psych)
     - Gameplay Scripting
 	- Customizable States (and Custom States too)
-    - Modchart system (soon...)
+    - Modchart system by [TheoDevelops](https://github.com/TheoDevelops/CNEModchart-Framework) (soon...)
 	- NDLL management (WIP)
 
 **NOTE**: Due to the limited Lua flexibility, do not consider it as a Scripting replacement, but as a complement. Remember that the main scripting system of this engine is HScript.
