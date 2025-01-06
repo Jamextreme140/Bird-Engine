@@ -2,6 +2,8 @@
 
 ![BirdEngine_banner](https://github.com/user-attachments/assets/00806e96-798e-4c40-8867-c2fd21d06ade)
 
+## CHECK THE [DOCUMENTATION](https://github.com/Jamextreme140/Bird-Engine/tree/main/docs/lua)
+
 Originally used on FNF Vs SC. This custom engine includes the following features
 
 - Full Lua Script support (non-Psych)
