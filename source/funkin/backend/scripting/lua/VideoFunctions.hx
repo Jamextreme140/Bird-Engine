@@ -11,6 +11,9 @@ class VideoFunctions {
 					return;
 
 				var theVideo:FlxVideoSprite = new FlxVideoSprite(x, y);
+				theVideo.bitmap.onEndReached.add(() -> {
+					script.call("onVideoFinished", [name]);
+				});
 				if(videoPath != null && videoPath.length > 0) {
 					if(!theVideo.load(Paths.video(videoPath, ext))) return;
 				}

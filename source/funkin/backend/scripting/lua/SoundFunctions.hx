@@ -5,9 +5,10 @@ import flixel.sound.FlxSound;
 final class SoundFunctions {
 	public static function getSoundFunctions(instance:MusicBeatState, ?script:Script):Map<String, Dynamic> {
 		return [
-			"playSound" => function(name:String, file:String, ?volume:Float = 1, ?looped:Bool = false, ?destroy:Bool = true) {
+			"playSound" => function(name:String, file:String, ?volume:Float = 100, ?looped:Bool = false, ?destroy:Bool = true) {
+				var finalVolume:Float = FlxMath.bound(volume, 0, 100) / 100;
 				if(name.trim().length == 0) {
-					FlxG.sound.play(Paths.sound(file), volume);
+					FlxG.sound.play(Paths.sound(file), finalVolume);
 					return;
 				}
 				
@@ -16,7 +17,7 @@ final class SoundFunctions {
 					sound.play(true);
 				}
 				else{
-					instance.luaObjects["SOUNDS"].set(name, FlxG.sound.play(Paths.sound(file), volume, looped, null, destroy, () -> {
+					instance.luaObjects["SOUNDS"].set(name, FlxG.sound.play(Paths.sound(file), finalVolume, looped, null, destroy, () -> {
 						if(!looped && destroy) {
 							instance.luaObjects["SOUNDS"].remove(name);
 						}
@@ -24,7 +25,7 @@ final class SoundFunctions {
 					}));
 				}
 			},
-			"stopSound" => function(name:String, destroy:Bool = true) {
+			"stopSound" => function(name:String, ?destroy:Bool = true) {
 				if(instance.luaObjects["SOUNDS"].exists(name)) {
 					var sound:FlxSound = instance.luaObjects["SOUNDS"].get(name);
 					sound.stop();

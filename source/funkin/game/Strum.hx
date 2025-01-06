@@ -1,10 +1,9 @@
 package funkin.game;
 
-import flixel.addons.effects.FlxSkewedSprite;
 import flixel.math.FlxPoint;
 import funkin.backend.system.Conductor;
 
-class Strum extends FlxSkewedSprite {
+class Strum extends FlxSprite {
 	public var extra:Map<String, Dynamic> = [];
 
 	/**
@@ -90,7 +89,6 @@ class Strum extends FlxSkewedSprite {
 		daNote.scrollFactor.set(scrollFactor.x, scrollFactor.y);
 		daNote.__noteAngle = getNotesAngle(daNote);
 		daNote.angle = daNote.isSustainNote ? daNote.__noteAngle : angle;
-		daNote.skew.set(this.skew.x, this.skew.y); //Skew the note as well as the strum (like NotITG)
 
 		updateNotePos(daNote);
 	}

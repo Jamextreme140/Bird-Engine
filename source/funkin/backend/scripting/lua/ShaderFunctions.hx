@@ -39,16 +39,16 @@ final class ShaderFunctions {
 					}
 				}
 				else {
-					LuaTools.getCamera("default").addShader(cShader); //Adds the shader to the current state camera
+					LuaTools.getCamera(object, instance).addShader(cShader); //Adds the shader to the current state camera
 					return;
 				}
 			},
-			"removeShader" => function(object:String, ?shader:String) {
+			"removeShader" => function(object:String, shader:String) {
 				if(!Options.gameplayShaders) return;
 
 				var object:Dynamic = LuaTools.getObject(instance, object);
 
-				if (object != null && (shader != null && shader.trim() != ""))
+				if (object != null)
 				{
 					if (object is FlxSprite)
 					{
@@ -72,7 +72,7 @@ final class ShaderFunctions {
 					var cShader:LuaShader = instance.luaObjects["SHADER"].get(shader);
 					if (cShader == null)
 						return;
-					LuaTools.getCamera("default").removeShader(cShader); //Removes the shader to the current state camera
+					LuaTools.getCamera(object, instance).removeShader(cShader); //Removes the shader to the current state camera
 					instance.luaObjects["SHADER"].set(shader, null); // Sets the shader null
 					instance.luaObjects["SHADER"].remove(shader); // Removes the shader from the map
 					return;

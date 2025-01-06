@@ -82,7 +82,8 @@ class MusicBeatSubstate extends FlxSubState implements IBeatReceiver
 		"TIMERS" => new Map<String, flixel.util.FlxTimer>(),
 		"SOUNDS" => new Map<String, flixel.sound.FlxSound>(),
 		"VIDEOS" => new Map<String, hxvlc.flixel.FlxVideoSprite>(),
-		"SCRIPTS" => new Map<String, funkin.backend.scripting.HScript>()
+		"SCRIPTS" => new Map<String, funkin.backend.scripting.HScript>(),
+		"CAMERA" => new Map<String, flixel.FlxCamera>()
 	];
 	#end
 

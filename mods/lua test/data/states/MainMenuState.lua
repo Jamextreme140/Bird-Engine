@@ -30,8 +30,8 @@ function postCreate()
 
 	createText('luaText', 'Bird Engine', posX, 500, 0, 27, 'default')
 	addSprite('luaText', 'default')
-	initShader('chromaticAberration')
-	addShader('default', 'chromaticAberration')
+	initShader('chrom', 'chromaticAberration')
+	addShader('default', 'chrom')
 
 	print("created");
 
@@ -43,20 +43,15 @@ end
 
 function beatHit(curBeat)
 	-- body
-	-- For now, Shader variables can be only modified through "setShaderField" callback
 	if(math.fmod(curBeat, 2) == 0 and not hasTween) then
 		--print(curBeat)
 		--shake('camHUD', 0.01, 0.1)
-		setShaderField('chromaticAberration', 'redOff', {ab1, 0})
-		setShaderField('chromaticAberration', 'blueOff', {-ab1, 0})
-		--chromaticAberration.shaderData.redOff = {ab1, 0}
-		--chromaticAberration.shaderData.blueOff = {-ab1, 0}
+		setShaderField('chrom', 'redOff', {ab1, 0})
+		setShaderField('chrom', 'blueOff', {-ab1, 0})
 		hasTween = true
 	elseif(math.fmod(curBeat, 4) == 0 and hasTween) then
-		setShaderField('chromaticAberration', 'redOff', {ab, 0})
-		setShaderField('chromaticAberration', 'blueOff', {-ab, 0})
-		--chromaticAberration.shaderData.redOff = {ab, 0}
-		--chromaticAberration.shaderData.blueOff = {-ab, 0}
+		setShaderField('chrom', 'redOff', {ab, 0})
+		setShaderField('chrom', 'blueOff', {-ab, 0})
 		hasTween = false
 	end
 

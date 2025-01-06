@@ -1,6 +1,5 @@
 package funkin.game;
 
-import flixel.addons.effects.FlxSkewedSprite;
 import funkin.backend.chart.ChartData;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
@@ -10,7 +9,7 @@ import funkin.backend.scripting.events.*;
 using StringTools;
 
 @:allow(funkin.game.PlayState)
-class Note extends FlxSkewedSprite
+class Note extends FlxSprite
 {
 	public var extra:Map<String, Dynamic> = [];
 

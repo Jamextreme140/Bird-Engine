@@ -23,12 +23,6 @@ function postCreate()
 
 	--print(getField("camGame.flashSprite.scaleX"))
 
-	for i=0,1 do
-		for j=1,4 do
-			tweenNote('skewNote'..i..j, i, j, "skew.x", -10, 0.1, 'linear', 'oneshot', 0)
-		end
-	end
-
 	print(getClassField('funkin.game.PlayState', 'SONG.meta.bpm'))
 	strumY = {getArrayField('playerStrums', 0, 'y'), getArrayField('playerStrums', 1, 'y'), getArrayField('playerStrums', 2, 'y'), getArrayField('playerStrums', 3, 'y')}
 	strumY2 = {getArrayField('cpuStrums', 0, 'y'), getArrayField('cpuStrums', 1, 'y'), getArrayField('cpuStrums', 2, 'y'), getArrayField('cpuStrums', 3, 'y')}
@@ -51,7 +45,6 @@ function beatHit(curBeat)
 	if(curBeat == 0) then
 		canTween = true
 		factor = 2
-		skewNotes()
 		invertX()
 	end
 	if(curBeat == 1) then
@@ -99,23 +92,6 @@ function invertY()
 	--tween('invertGame2', 'camGame.flashSprite', 'scaleY', getField('camGame.flashSprite.scaleY') * -1, 0.5, 'circOut')
 	camHUD.flashSprite.scaleY = camHUD.flashSprite.scaleY * -1;
 	camGame.flashSprite.scaleY = camGame.flashSprite.scaleY * -1;
-end
-
-function skewNotes()
-	for i=0,1 do -- strumline
-		for j=1,4 do -- note
-			tweenNote('skewNote'..i..j, i, j, "skew.x", 10, (60/curBpm), 'elasticout', 'pingpong', 0)
-		end
-	end
-end
-
-function resetSkew()
-	for i=0,1 do
-		for j=1,4 do
-			cancelTween('skewNote'..i..j)
-			tweenNote('RskewNote'..i..j, i, j, "skew.x", 0, 0.1, 'linear', 'oneshot', 0)
-		end
-	end
 end
 
 function callMe()

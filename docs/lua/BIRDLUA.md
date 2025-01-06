@@ -5,7 +5,7 @@ The system is based on Codename's Lua System from [lua-test](https://github.com/
 
 ## How to use it
 
-It's basically works almost the same way as the Codename's scripting system; It can change not only gameplay, but also menus and other engine functions (but may be limited). 
+It's basically works almost the same way as the Codename's scripting system; It can change not only gameplay, but also menus and other engine functions (but may be limited).
 
 **NOTE: be aware that it doesn't have the same functions as Psych Engine Lua.**
 
