@@ -5,7 +5,7 @@
 		title="Friday Night Funkin' - Bird Engine" main="funkin.backend.system.Main"
 		file="BirdEngine" packageName="com.jamextreme140.birdengine"
 		package="com.jamextreme140.birdengine"
-		version="1.4.1" company="Jamextreme140" />
+		version="1.4.2" company="Jamextreme140" />
 
 	<!--
 		CHANGE THE SAVE PATH & NAME FOR YOUR MOD HERE!

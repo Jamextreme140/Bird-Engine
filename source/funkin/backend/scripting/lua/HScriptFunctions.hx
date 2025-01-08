@@ -1,7 +1,6 @@
 package funkin.backend.scripting.lua;
 
 class HScriptFunctions {
-	//TODO: turn the hscript thing into a singleton
 	public static function getHScriptFunctions(?instance:MusicBeatState, ?script:Script):Map<String, Dynamic> {
 		#if ENABLE_LUA
 		return [
@@ -16,28 +15,29 @@ class HScriptFunctions {
 				}
 				if(_script != null)
 					_script.load();
-				//var _script = Script.fromString(code, '${haxe.io.Path.withoutExtension(script.path)}.hx', false);
-				//PlayState.instance.scripts.add(_script);
 			},
-			"callScriptFunction" => function(name:String, func:String, args:Array<Dynamic>):Dynamic { // This one doesn't work
-				if(!instance.luaObjects["SCRIPTS"].exists(name)) return null;
+			"callScriptFunction" => function(name:String, func:String, ?args:Array<Dynamic>):Dynamic {
+				if(instance.luaObjects["SCRIPTS"].exists(name)){
+					var _script:HScript = instance.luaObjects["SCRIPTS"].get(name);
+					var r:Dynamic = _script.call(func, args != null ? args : []);
+					return r;
+				}
 
-				var _script:HScript = instance.luaObjects["SCRIPTS"].get(name);
-				return _script.call(func, args);
+				return null;
 			},
-			"pushVar" => function(name:String, varName:String, variable:Dynamic) { //This behaves like "addHaxeLibrary from Psych, but is unnecessary since imports are supported"
-				if(!instance.luaObjects["SCRIPTS"].exists(name)) return;
-
-				var _script:HScript = instance.luaObjects["SCRIPTS"].get(name);
-				_script.set(varName, variable);
+			"pushVar" => function(name:String, varName:String, variable:Dynamic) { //TODO: remove this
+				if(instance.luaObjects["SCRIPTS"].exists(name)) {
+					var _script:HScript = instance.luaObjects["SCRIPTS"].get(name);
+					_script.set(varName, variable);
+				}
 			},
 			"stopScript" => function(name:String) {
-				if(!instance.luaObjects["SCRIPTS"].exists(name)) return;
-
-				var _script:HScript = instance.luaObjects["SCRIPTS"].get(name);
-				_script.active = false;
-				instance.luaObjects["SCRIPTS"].remove(name);
-				_script.destroy();
+				if(instance.luaObjects["SCRIPTS"].exists(name)) {
+					var _script:HScript = instance.luaObjects["SCRIPTS"].get(name);
+					_script.active = false;
+					instance.luaObjects["SCRIPTS"].remove(name);
+					_script.destroy();
+				}
 			}
 		];
 		#else

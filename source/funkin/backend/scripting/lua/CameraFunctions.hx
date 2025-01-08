@@ -11,13 +11,13 @@ class CameraFunctions {
 					instance.luaObjects["CAMERA"].set(name, new FlxCamera(x, y, width, height));
 				}
 			},
-			"addCamera" => function(name:String, defaultDrawTarget:Bool = false) {
+			"addCamera" => function(name:String, ?defaultDrawTarget:Bool = false) {
 				if(name.trim() != '' && instance.luaObjects["CAMERA"].exists(name)) {
 					var theCam:FlxCamera = instance.luaObjects["CAMERA"].get(name);
 					FlxG.cameras.add(theCam, defaultDrawTarget);
 				}
 			},
-			"setCameraLerp" => function(name:String, value:Float) {
+			"setCameraLerp" => function(name:String, ?value:Float = 1.0) {
 				if(name.trim() != '' && instance.luaObjects["CAMERA"].exists(name)) {
 					var theCam:FlxCamera = instance.luaObjects["CAMERA"].get(name);
 					theCam.followLerp = value;

@@ -8,6 +8,8 @@ final class StateFunctions {
 		return [
 			"switchState" => function(state:String, ?data:Dynamic) {
 				switch(state.toLowerCase()) {
+					case "playstate" | "play":
+						FlxG.switchState(new PlayState());
 					case "mainmenustate" | "mainmenu":
 						FlxG.switchState(new MainMenuState());
 					case "freeplaystate" | "freeplay":
@@ -21,6 +23,9 @@ final class StateFunctions {
 					default:
 						FlxG.switchState(new ModState(state, data ?? null));
 				}
+			},
+			"resetState" => function() {
+				FlxG.resetState();
 			}
 		];
 	}

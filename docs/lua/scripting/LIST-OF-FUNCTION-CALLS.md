@@ -24,6 +24,23 @@ Works like `update(elasped)` but tween specific.
 
 - name: Video Alias.
 
+## Timer Functions calls
+
+### `onTimer(event)`
+
+- event (cancellable):
+  - name: Timer Alias
+  - loopsLeft: How many loops are left on the timer
+  - timeLeft: How much time is left on the timer
+  - progress: How far along the timer is, on a scale of 0.0 to 1.0.
+  - finished: The timer is finished
+
+## Cutscene Functions calls
+
+### `onStartCutscene(prefix)`
+
+- prefix: Custom prefix.
+
 ## States/substates(not yet)
 
 ### `create()`

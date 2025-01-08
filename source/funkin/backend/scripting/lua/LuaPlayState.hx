@@ -14,7 +14,7 @@ final class LuaPlayState {
 			"chartingMode"		=> PlayState.chartingMode,
 			"curBpm" 			=> Conductor.bpm,
 			"songBpm" 			=> PlayState.SONG.meta.bpm,
-			"scrollSpeed" 		=> PlayState.SONG.scrollSpeed,
+			"scrollSpeed" 		=> PlayState.instance.scrollSpeed,
 			"crochet" 			=> Conductor.crochet,
 			"stepCrochet" 		=> Conductor.stepCrochet,
 			"songLength" 		=> FlxG.sound.music?.length ?? 0.0,
@@ -26,9 +26,7 @@ final class LuaPlayState {
 			"week" 				=> PlayState.storyWeek?.name ?? "",
 			"seenCutscene" 		=> PlayState.seenCutscene,
 			"needVoices" 		=> PlayState.SONG.meta.needsVoices,
-			// Camera
-			"camX" 			=> 0,
-			"camY" 			=> 0,
+
 			// Game Screen
 			"gameWidth" 	=> FlxG.width,
 			"gameHeight" 	=> FlxG.height,
@@ -38,18 +36,6 @@ final class LuaPlayState {
 			"curBeatFloat" 	=> 0.0,
 			"curStep" 		=> 0,
 			"curStepFloat" 	=> 0.0,
-
-			"score" 		=> 0,
-			"misses" 		=> 0,
-			"hits" 			=> 0,
-			"combo" 		=> 0,
-
-			"rating" 		=> '',
-
-			"inGameOver" 	=> false,
-			
-			"healthGainMulti" => 1.0,
-			"healthLossMulti" => 1.0,
 
 			"botPlay" 		=> PlayState.instance.playerStrums?.cpu ?? false,
 			
@@ -81,14 +67,13 @@ final class LuaPlayState {
 				});
 			},
 			"callFunction" => function(func:String, ?args:Array<Dynamic>) {
-				PlayState.instance.scripts.call(func, args);
-				return;
+				return PlayState.instance.scripts.call(func, args);
 			},
 			"executeEvent" => function(event:String, args:Array<String>){
 				var event:ChartEvent = {name: event, time: Conductor.songPosition, params: args};
 				PlayState.instance.executeEvent(event);
 			},
-			"shake" => function(camera:String, ?amount:Float = 0.05, ?time:Float = 0.5) {
+			"shake" => function(camera:String = 'default', ?amount:Float = 0.05, ?time:Float = 0.5) {
 				LuaTools.getCamera(camera.toLowerCase(), PlayState.instance).shake(amount, time);
 			}
 		];
