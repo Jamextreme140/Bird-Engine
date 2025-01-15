@@ -38,6 +38,10 @@ class Options
 
 	public static var lastLoadedMod:String = null;
 
+	#if MODCHARTING_FEATURES
+	public static var hold_subs:Int = 4;
+	#end
+
 	/**
 	 * EDITORS SETTINGS
 	 */

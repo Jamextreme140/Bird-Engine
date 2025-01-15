@@ -7,6 +7,7 @@ typedef CharacterCreationData = {
 	var anim:Array<AnimData>;
 }
 
+// TODO: choice between player and opponent type character
 class CharacterCreationScreen extends UISubstateWindow {
 	public static var instance:CharacterCreationScreen = null;
 	
@@ -38,7 +39,7 @@ class CharacterCreationScreen extends UISubstateWindow {
 	public var onSave:(xml:Xml) -> Void = null;
 
 	var curData:CharacterCreationData;
-	private var template:String = 
+	private var opponentTemplate:String = 
 	'<character isPlayer="false" flipX="false" holdTime="4" color="#AF66CE">
 		<anim name="idle"      anim="Dad idle dance"      fps="24" loop="false" x="0" y="0"/>
 		<anim name="singUP"    anim="Dad Sing note UP"    fps="24" loop="false" x="-6" y="50"/>
@@ -136,7 +137,7 @@ class CharacterCreationScreen extends UISubstateWindow {
 				if(_ != null) addAnim(_);
 			}));
 		}
-		var tempXML = Xml.parse(template).firstElement();
+		var tempXML = Xml.parse(opponentTemplate).firstElement();
 		var c:Int = 0;
 		for (i in tempXML.elements())
 		{
@@ -188,11 +189,17 @@ class CharacterCreationScreen extends UISubstateWindow {
 	}
 
 	function checkSpriteFile(sprite:String) {
+		var fileExists:Bool = false;
 		if(sprite != null && sprite.trim().length > 0) {
 			var spriteFile = Paths.image("characters/" + sprite); // Common spritesheet file
         	var spriteAtlas = haxe.io.Path.withoutExtension(spriteFile) + "/Animation.json"; // Texture Atlas
-			if(!Assets.exists(spriteFile) && !Assets.exists(spriteAtlas)) {
-				openSubState(new UIWarningSubstate("Missing Sprite file!", "The provided filename doesn't exist or is inaccessible. Try again.", [
+        	var spriteMulti = haxe.io.Path.withoutExtension(spriteFile) + "/1.xml"; // Multiple Spritesheets
+			for(sf in [spriteFile, spriteAtlas, spriteMulti]) {
+				if(Assets.exists(sf))
+					fileExists = true;
+			}
+			if(!fileExists) {
+				openSubState(new UIWarningSubstate("Missing Sprite file!", "The provided filename/folder doesn't exist or is inaccessible. Try again.", [
 					{label: "Ok", color: 0xFFFF0000, onClick: function(t) {}}
 				]));
 			}

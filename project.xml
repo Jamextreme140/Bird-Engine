@@ -5,7 +5,7 @@
 		title="Friday Night Funkin' - Bird Engine" main="funkin.backend.system.Main"
 		file="BirdEngine" packageName="com.jamextreme140.birdengine"
 		package="com.jamextreme140.birdengine"
-		version="1.4.2" company="Jamextreme140" />
+		version="1.5.0" company="Jamextreme140" />
 
 	<!--
 		CHANGE THE SAVE PATH & NAME FOR YOUR MOD HERE!
@@ -153,6 +153,9 @@
 	<!-- Comment this out to disable dark mode windows -->
 	<define name="DARK_MODE_WINDOW"/>
 
+	<!-- Comment this out to disable modchart features -->
+	<define name="MODCHARTING_FEATURES"/>
+
 	<!-- Uncomment this out to go straight to the character editor (ONLY FOR DEV) -->
 	<!-- <define name="CHARACTER_EDITOR" /> -->
 
@@ -164,6 +167,8 @@
 	<haxedef name="openfl_dpi_aware" if="openfl_dpi_aware" />
 
 	<haxedef name="EXPERIMENTAL_FLXGRAPHIC_DESTROY_FIX" />
+
+	<haxedef name="MODCHARTING_FEATURES" if="MODCHARTING_FEATURES"/>
 
 	<!-- _______________________________ Libraries ______________________________ -->
 
@@ -187,7 +192,16 @@
 	<haxelib name="hxdiscord_rpc" if="DISCORD_RPC"/>
 	<haxelib name="markdown" />
 
+	<haxelib name="FunkinModchart" if="MODCHARTING_FEATURES"/>
+
 	<!-- _________________________________ Additional stuff _______________________________ -->
+
+	<section if="MODCHARTING_FEATURES">
+		<haxedef name="FM_ENGINE" value="BIRD"/>
+		<haxedef name="FM_ENGINE_VERSION" value="1.5.0"/>
+
+		<haxeflag name="--macro" value="modchart.core.macros.Macro.includeFiles()"/>
+	</section>
 
 	<section if="COMPILE_ALL_CLASSES">
 		<haxeflag name="-dce" value="no" />

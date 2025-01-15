@@ -64,9 +64,9 @@ class ScriptPack extends Script {
 	public function luaCall(func:String, ?parameters:Array<Dynamic>):Dynamic {
 		#if ENABLE_LUA
 		for(e in scripts) {
-			if(!(e is LuaScript)) continue;
-			if(e.active) 
-				e.call(func, parameters);	
+			if(e is LuaScript && e.active) {
+				e.call(func, parameters);
+			}	
 		}
 		#end
 		return null;

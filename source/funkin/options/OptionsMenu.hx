@@ -24,12 +24,21 @@ class OptionsMenu extends TreeMenu {
 			desc: 'Change Appearance options such as Flashing menus...',
 			state: AppearanceOptions
 		},
+		#if MODCHARTING_FEATURES
+		{
+			name: 'Modchart Settings >',
+			desc: 'Customize your modcharting experience...',
+			state: ModchartingOptions
+		},
+		#end
 		{
 			name: 'Miscellaneous >',
 			desc: 'Use this menu to reset save data or engine settings.',
 			state: MiscOptions
 		}
 	];
+
+	var bg:FlxSprite;
 
 	public override function create() {
 		super.create();
@@ -38,7 +47,7 @@ class OptionsMenu extends TreeMenu {
 
 		DiscordUtil.call("onMenuLoaded", ["Options Menu"]);
 
-		var bg:FlxSprite = new FlxSprite(-80).loadAnimatedGraphic(Paths.image('menus/menuBGBlue'));
+		bg = new FlxSprite(-80).loadAnimatedGraphic(Paths.image('menus/menuBGBlue'));
 		// bg.scrollFactor.set();
 		bg.scale.set(1.15, 1.15);
 		bg.updateHitbox();

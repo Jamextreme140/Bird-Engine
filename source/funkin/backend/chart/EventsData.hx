@@ -35,7 +35,7 @@ class EventsData {
 			{name: "Time (Steps)", type: TFloat(0.25, 9999, 0.25, 2), defValue: 4},
 			{name: "Camera", type: TDropDown(['camGame', 'camHUD']), defValue: "camHUD"}
 		],
-		"BPM Change" => [{name: "Target BPM", type: TFloat(1), defValue: 100}],
+		"BPM Change" => [{name: "Target BPM", type: TFloat(1.00, null, 0.001, 3), defValue: 100}],
 		"Scroll Speed Change" => [
 			{name: "Tween Speed?", type: TBool, defValue: true},
 			{name: "New Speed", type: TFloat(0.01, 99, 0.01, 2), defValue: 1.},
@@ -79,7 +79,7 @@ class EventsData {
 		hscriptParser.allowJSON = hscriptParser.allowMetadata = false;
 
 		for (file in Paths.getFolderContent('data/events/', true, BOTH)) {
-			if (Path.extension(file) != "json" && Path.extension(file) != "pack") continue;
+			if (Path.extension(file) != "json" && Path.extension(file) != "pack" || Path.extension(file) == "lua") continue;
 			var eventName:String = Path.withoutExtension(Path.withoutDirectory(file));
 			var fileTxt:String = Assets.getText(file);
 
