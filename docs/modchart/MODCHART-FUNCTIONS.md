@@ -64,7 +64,7 @@ Tweens the percentage of `mod` from its current value to `value` over the specif
 - mod:String   The modifier name string
 - beat:Float   The beat number where the event will be executed.
 - length:Float The tween duration in beats.
-- ease:F->F    The ease function (Float to Float)
+- ease:String  The ease function.
 - value:Float  The value to be assigned to the modifier.
 - player:Int   The player/strumline number (-1 by default)
 - field:Int    The playfield number  (-1 by default)
@@ -94,7 +94,7 @@ Repeats the execution of the callback function for the specified duration, start
 
 - beat:Float   The beat number where the event will be executed.
 - length:Float The repeater duration in beats.
-- func:V->V    The function name.
+- func:String  The function name.
 - field:Int    The playfield number  (-1 by default).
 
 This calls `onRepeaterCallback(event, length)`, just like `onModchartCallback(event)`
