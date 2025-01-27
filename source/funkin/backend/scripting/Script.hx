@@ -100,7 +100,9 @@ class Script extends FlxBasic implements IFlxDestroyable {
 	public static function getDefaultPreprocessors():Map<String, Dynamic> {
 		var defines = funkin.backend.system.macros.DefinesMacro.defines;
 		defines.set("CODENAME_ENGINE", true);
-		defines.set("CODENAME_VER", Application.current.meta.get('version'));
+		defines.set("BIRD_ENGINE", true);
+		defines.set("CODENAME_VER", '0.1.0');
+		defines.set("BIRD_VER", Application.current.meta.get('version'));
 		defines.set("CODENAME_BUILD", 2675); // 2675 being the last build num before it was removed
 		defines.set("CODENAME_COMMIT", funkin.backend.system.macros.GitCommitMacro.commitNumber);
 		return defines;

@@ -4,6 +4,10 @@ import flixel.util.FlxColor;
 import flixel.tweens.FlxTween.FlxTweenType;
 
 class LuaTools {
+	public static function printFuncMsg(func:String, msg:String, type:Level, ?hint:String, ) {
+		Logs.trace('${func}(): ${msg}. ${hint.getDefault('')}', type);
+	}
+
 	#if ENABLE_LUA
 	public static function getCurrentSystem():String {
 		#if linux

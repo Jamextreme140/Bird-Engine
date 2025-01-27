@@ -913,7 +913,7 @@ class PlayState extends MusicBeatState
 				var spr = event.spritePath;
 				if (!Assets.exists(spr)) spr = Paths.image('$spr');
 
-				sprite = new FlxSprite().loadAnimatedGraphic(spr);
+				sprite = new FunkinSprite().loadAnimatedGraphic(spr);
 				sprite.scrollFactor.set();
 				sprite.scale.set(event.scale, event.scale);
 				sprite.updateHitbox();

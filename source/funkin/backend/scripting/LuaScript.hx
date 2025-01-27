@@ -32,6 +32,11 @@ class LuaScript extends Script{
 	private var lastStackID:Int = 0;
 
 	public static var curLuaScript:LuaScript = null;
+
+	#if MODCHARTING_FEATURES
+	@:allow(funkin.backend.scripting.lua.ModchartFunctions)
+	var modchartManager:modchart.Manager;
+	#end
 	
 	public function new(path:String, ?fromSubstate:Bool = false) {
 		parent = {
@@ -133,53 +138,37 @@ class LuaScript extends Script{
 
 	function setCallbacks() {
 		if(parent.instance is PlayState) {
-			for(k=>e in LuaPlayState.getPlayStateVariables(this)) {
+			for (k => e in LuaPlayState.getPlayStateVariables(this))
 				set(k, e);
-			}
-			for(k=>e in LuaPlayState.getPlayStateFunctions(this)) {
+			for (k => e in LuaPlayState.getPlayStateFunctions(this))
 				addCallback(k, e);
-			}
-			for(k=>e in TweenFunctions.getModchartFunctions(parent.instance, this)) {
+			for (k => e in ModchartFunctions.getModchartFunctions(this))
 				addCallback(k, e);
-			}
-			
+			for (k => e in ModchartFunctions.getFunkinModchartFunctions(this))
+				addCallback(k, e);
 		}
 		for (k => e in HScriptFunctions.getHScriptFunctions(parent.instance, this))
-		{
 			addCallback(k, e);
-		}
-		for(k=>e in SpriteFunctions.getSpriteFunctions(parent.instance, this)) {
+		for (k => e in SpriteFunctions.getSpriteFunctions(parent.instance, this))
 			addCallback(k, e);
-		}
-		for(k=>e in TweenFunctions.getTweenFunctions(parent.instance, this)) {
+		for (k => e in TweenFunctions.getTweenFunctions(parent.instance, this))
 			addCallback(k, e);
-		}
-		for(k=>e in ReflectionFunctions.getReflectFunctions(parent.instance, this)) {
+		for (k => e in ReflectionFunctions.getReflectFunctions(parent.instance, this))
 			addCallback(k, e);
-		}
-		for(k=>e in UtilFunctions.getUtilFunctions(parent.instance, this)) {
+		for (k => e in UtilFunctions.getUtilFunctions(parent.instance, this))
 			addCallback(k, e);
-		}
-		for(k=>e in ShaderFunctions.getShaderFunctions(parent.instance, this)) {
+		for (k => e in ShaderFunctions.getShaderFunctions(parent.instance, this))
 			addCallback(k, e);
-		}
-		for(k=>e in SoundFunctions.getSoundFunctions(parent.instance, this)){
+		for (k => e in SoundFunctions.getSoundFunctions(parent.instance, this))
 			addCallback(k, e);
-		}
-		for(k=>e in VideoFunctions.getVideoFunctions(parent.instance, this)){
+		for (k => e in VideoFunctions.getVideoFunctions(parent.instance, this))
 			addCallback(k, e);
-		}
-		for(k=>e in CameraFunctions.getCameraFunctions(parent.instance, this)){
+		for (k => e in CameraFunctions.getCameraFunctions(parent.instance, this))
 			addCallback(k, e);
-		}
-		#if NDLLS_SUPPORTED
-		for(k=>e in NdllFunctions.getNdllFunctions(this)) {
+		for (k => e in NdllFunctions.getNdllFunctions(this))
 			addCallback(k, e);
-		}
-		#end
-		for(k=>e in OptionsVariables.getOptionsVariables(this)) {
+		for (k => e in OptionsVariables.getOptionsVariables(this))
 			set(k, e);
-		}
 	}
 
 	public function event<T:CancellableEvent>(func:String, event:T):T {
@@ -202,9 +191,19 @@ class LuaScript extends Script{
 
     public override function setParent(variable:Dynamic) {
 		parent.parent = variable;
-		var fields:Array<String> = (variable == null) ? [] : Type.getInstanceFields(Type.getClass(variable));
+		var fields:Array<String> = switch(Type.typeof(variable)) {
+			case TClass(c): Type.getInstanceFields(c);
+			case TObject: 
+				var cls = Type.getClass(variable);
+				switch(Type.typeof(cls)) {
+					case TClass(c): Type.getInstanceFields(c);
+					default: Reflect.fields(variable);
+				}
+			default: [];
+		};
+		parent.parentFields = fields;
 		for(field in fields) {
-			this.set(field, Reflect.getProperty(variable, field));
+			this.set(field, Reflect.field(variable, field));
 		}
 	}
 
@@ -223,11 +222,11 @@ class LuaScript extends Script{
 
 	public function close()
 	{
+		this.active = false;
 		if(state == null) {
 			return;
 		}
-		this.active = false;
-		Lua.close(state);
+		state.close();
 		state = null;
 		funkin.backend.system.framerate.LuaInfo.luaCount -= 1;
 	}
@@ -456,6 +455,7 @@ typedef ParentObject =
 {
 	var instance:MusicBeatState;
 	var parent:Dynamic;
+	var ?parentFields:Array<String>;
 }
 
 typedef StackPointer =  {

@@ -5,7 +5,7 @@
 		title="Friday Night Funkin' - Bird Engine" main="funkin.backend.system.Main"
 		file="BirdEngine" packageName="com.jamextreme140.birdengine"
 		package="com.jamextreme140.birdengine"
-		version="1.5.0" company="Jamextreme140" />
+		version="1.5.1" company="Jamextreme140" />
 
 	<!--
 		CHANGE THE SAVE PATH & NAME FOR YOUR MOD HERE!
@@ -159,6 +159,9 @@
 	<!-- Uncomment this out to go straight to the character editor (ONLY FOR DEV) -->
 	<!-- <define name="CHARACTER_EDITOR" /> -->
 
+	<!-- Disable a optimization, to allow reflection to use more functions -->
+	<define name="FLX_NO_GENERIC" />
+
 	<haxedef name="VIDEO_CUTSCENES" if="VIDEO_CUTSCENES" />
 	<haxedef name="UPDATE_CHECKING" if="UPDATE_CHECKING" />
 	<haxedef name="DISCORD_RPC" if="DISCORD_RPC" />
@@ -198,7 +201,7 @@
 
 	<section if="MODCHARTING_FEATURES">
 		<haxedef name="FM_ENGINE" value="BIRD"/>
-		<haxedef name="FM_ENGINE_VERSION" value="1.5.0"/>
+		<haxedef name="FM_ENGINE_VERSION" value="1.5.1"/>
 
 		<haxeflag name="--macro" value="modchart.core.macros.Macro.includeFiles()"/>
 	</section>

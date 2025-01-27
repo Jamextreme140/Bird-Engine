@@ -1159,6 +1159,7 @@ class Charter extends UIState {
 					selection.remove(note);
 				else i++;
 			}
+			else i++;
 		}
 	}
 	#end

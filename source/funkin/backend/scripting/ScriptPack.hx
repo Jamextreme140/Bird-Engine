@@ -147,8 +147,8 @@ class ScriptPack extends Script {
 			if(script is LuaScript)
 				switch(k) {
 					case "importScript":
-						cast(script, LuaScript).addCallback(k, function(path:String) {
-							var script = Script.create(Paths.script(path));
+						cast(script, LuaScript).addCallback(k, function(path:String, ?useLua:Bool = false) {
+							var script = Script.create(Paths.script(path), useLua);
 							if (script is DummyScript)
 							{
 								Logs.trace('Script at ${path} does not exist.', ERROR);
