@@ -4,7 +4,7 @@ import flixel.util.FlxColor;
 import flixel.tweens.FlxTween.FlxTweenType;
 
 class LuaTools {
-	public static function printFuncMsg(func:String, msg:String, type:Level, ?hint:String, ) {
+	public static function printFuncMsg(func:String, msg:String, type:Level, ?hint:String) {
 		Logs.trace('${func}(): ${msg}. ${hint.getDefault('')}', type);
 	}
 
@@ -13,7 +13,7 @@ class LuaTools {
 		#if linux
 		return 'linux';
 		#else
-		return lime.system.System.platformName;
+		return lime.system.System.platformName.toLowerCase();
 		#end
 	}
 
@@ -41,12 +41,12 @@ class LuaTools {
 
 		if (fields.length > 1)
 		{
-			var _var:Dynamic = Reflect.getProperty(obj, fields[0]);
+			var nextField:Dynamic = Reflect.getProperty(obj, fields[0]);
 			for (i in 1...fields.length)
 			{
-				_var = Reflect.getProperty(_var, fields[i]);
+				nextField = Reflect.getProperty(nextField, fields[i]);
 			}
-			value = _var;
+			value = nextField;
 		}
 		else
 		{
@@ -75,12 +75,12 @@ class LuaTools {
 
 		if (fields.length > 1)
 		{
-			var _var:Dynamic = Reflect.getProperty(obj, fields[0]);
+			var nextField:Dynamic = Reflect.getProperty(obj, fields[0]);
 			for (i in 1...fields.length - 1)
 			{
-				_var = Reflect.getProperty(_var, fields[i]);
+				nextField = Reflect.getProperty(nextField, fields[i]);
 			}
-			Reflect.setProperty(_var, fields[fields.length - 1], value);
+			Reflect.setProperty(nextField, fields[fields.length - 1], value);
 		}
 		else
 		{
@@ -144,8 +144,9 @@ class LuaTools {
 		}
 	}
 
-	public static function getEase(?ease:String = '')
+	public static function getEase(?ease:String = 'linear'):EaseFunction
 	{
+		/*
 		return switch(ease.toLowerCase().trim()) {
 			case 'backin': FlxEase.backIn;
 			case 'backinout': FlxEase.backInOut;
@@ -185,6 +186,10 @@ class LuaTools {
 			case 'smootherstepout': FlxEase.smootherStepOut;
 			default: FlxEase.linear;
 		}
+		*/
+		if(ease.trim().length <= 0) ease = 'linear';
+		var easeToUse:EaseFunction = Reflect.field(FlxEase, ease);
+		return easeToUse.getDefault(FlxEase.linear);
 	}
 
 	public static function getTweenType(type:String):Int {
