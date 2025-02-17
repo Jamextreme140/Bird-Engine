@@ -37,7 +37,7 @@ class MusicBeatTransition extends MusicBeatSubstate {
 
 		cameras = [transitionCamera];
 
-		transitionScript = Script.create(Paths.script(script));
+		transitionScript = Script.create(Paths.script(script) #if ENABLE_LUA , true, {instance: this, parent: this} #end);
 		transitionScript.setParent(this);
 		transitionScript.load();
 

@@ -23,7 +23,7 @@ Stops the timer.
 - name: Timer Alias.
 - destroy (opt.) = true: Removes and destroys the timer to save memory.
 
-## State functions
+## State/Substate functions
 
 ### `switchState(state, data)`
 
@@ -42,3 +42,15 @@ Attempts to switch from the current game state to the specified `state`. If isn'
 ### `resetState()`
 
 Request a reset of the current game state.
+
+### `openSubState(substate, data)`
+
+Attempts to open a substate from the current game state to the specified `substate`.
+A SubState is a special state that can be opened from within a State or another SubState.
+
+To close it: `callMethod('close')`
+
+- substate: Name of the substate:
+  - "pausemenu"
+  - "any/other" = Custom Substate
+- data: Optional extra Dynamic data passed from a previous state. Only works for Custom SubStates.

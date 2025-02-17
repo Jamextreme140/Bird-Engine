@@ -39,7 +39,14 @@ class Options
 	public static var lastLoadedMod:String = null;
 
 	#if MODCHARTING_FEATURES
-	public static var hold_subs:Int = 4;
+	@:deprecated("Refer to Options.modchartingHoldSubdivisions instead")
+	public static var hold_subs(get, set):Int;
+	private static function get_hold_subs():Int
+		return modchartingHoldSubdivisions;
+	private static function set_hold_subs(value:Int):Int
+		return modchartingHoldSubdivisions = value;
+	
+	public static var modchartingHoldSubdivisions = 4;
 	#end
 
 	/**

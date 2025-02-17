@@ -3,9 +3,11 @@ package funkin.backend.scripting.lua;
 import flixel.tweens.*;
 import flixel.tweens.FlxTween.FlxTweenType;
 
+import funkin.backend.scripting.lua.utils.ILuaScriptable;
+
 final class TweenFunctions {
 	
-	public static function getTweenFunctions(instance:MusicBeatState, ?script:Script):Map<String, Dynamic> {
+	public static function getTweenFunctions(instance:ILuaScriptable, ?script:Script):Map<String, Dynamic> {
 		return [
 			"tween" 	=> function(tweenName:String, object:String, property:String, value:Dynamic, duration:Float, ?ease:String = 'linear', ?type:String = 'oneshot', ?timeDelayed:Float = 0.0) {
 				var obj = object.split(".");

@@ -3,8 +3,10 @@ package funkin.backend.scripting.lua;
 import flixel.math.FlxPoint;
 import flixel.FlxCamera;
 
+import funkin.backend.scripting.lua.utils.ILuaScriptable;
+
 class CameraFunctions {
-	public static function getCameraFunctions(instance:MusicBeatState, ?script:Script):Map<String, Dynamic> {
+	public static function getCameraFunctions(instance:ILuaScriptable, ?script:Script):Map<String, Dynamic> {
 		return [
 			"createCamera" => function(name:String, ?x:Int = 0, ?y:Int = 0, ?width:Int = 0, ?height:Int = 0) {
 				if(name.trim() != '' || !instance.luaObjects["CAMERA"].exists(name)) {

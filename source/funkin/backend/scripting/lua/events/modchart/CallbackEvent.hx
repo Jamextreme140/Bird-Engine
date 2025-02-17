@@ -18,8 +18,6 @@ final class CallbackEvent extends CancellableEvent{
 
 	public var beat:Float;
 
-	public var field:Int;
-
 	public var fired:Bool = false;
 
 	public var active:Bool = false;

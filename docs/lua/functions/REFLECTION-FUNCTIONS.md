@@ -87,3 +87,30 @@ Sets the property or variable value from a given class.
 - index: The array index (or the FlxGroup member index).
 - arrayField: The field to fetch.
 - value: The value to set to the field.
+
+## Calling functions
+
+### `callMethod(function, args)`
+
+Call an specified `function` of the current state/substate with the given arguments `args`.
+
+- function: Functions to call
+- args (opt.): Function arguments
+
+### `callObjectMethod(object, function, args)`
+
+Call an specified `function` of the specified `object`, like a sprite, with the given arguments `args`.
+
+Example: `callObjectMethod('aSprite', 'setPosition', {100, 100})`
+
+- object: The referenced object
+- function: Functions to call
+- args (opt.): Function arguments
+
+### `callClassMethod(className, function, args)`
+
+Call an specified `function` of the specified `className` with the given arguments `args`.
+
+- className: The referenced class. Must be the full path (Ex: 'flixel.FlxG')
+- function: Functions to call
+- args (opt.): Function arguments

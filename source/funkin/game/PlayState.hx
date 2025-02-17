@@ -562,7 +562,9 @@ class PlayState extends MusicBeatState
 
 		PauseSubState.script = "";
 		GameOverSubstate.script = "";
-		(scripts = new ScriptPack("PlayState")).setParent(this);
+		//(scripts = new ScriptPack("PlayState")).setParent(this); Take it easy bro 
+		scripts = new ScriptPack("PlayState");
+		scripts.setParent(this);
 
 		camGame = camera;
 		FlxG.cameras.add(camHUD = new HudCamera(), false);
@@ -657,7 +659,7 @@ class PlayState extends MusicBeatState
 		for(noteType in SONG.noteTypes) {
 			var scriptPath = Paths.script('data/notes/${noteType}');
 			if (Assets.exists(scriptPath) && !scripts.contains(scriptPath)) {
-				var script = Script.create(scriptPath, #if ENABLE_LUA true #else false #end);
+				var script = Script.create(scriptPath #if ENABLE_LUA , true, {instance: this, parent: this} #end);
 				if (!(script is DummyScript)) {
 					scripts.add(script);
 					script.load();
@@ -1240,8 +1242,11 @@ class PlayState extends MusicBeatState
 			accFormat.format.color = curRating.color;
 			accuracyTxt.text = 'Accuracy:${accuracy < 0 ? "-%" : '${CoolUtil.quantize(accuracy * 100, 100)}%'} - ${curRating.rating}';
 
-			accuracyTxt._formatRanges[0].range.start = accuracyTxt.text.length - curRating.rating.length;
-			accuracyTxt._formatRanges[0].range.end = accuracyTxt.text.length;
+			for (i => frmtRange in accuracyTxt._formatRanges) if (frmtRange.format == accFormat) {
+				accuracyTxt._formatRanges[i].range.start = accuracyTxt.text.length - curRating.rating.length;
+				accuracyTxt._formatRanges[i].range.end = accuracyTxt.text.length;
+				break;
+			}
 		}
 	}
 
@@ -1849,7 +1854,7 @@ class PlayState extends MusicBeatState
 	public function addScript(file:String, ?useLua:Bool = false) {
 		var ext = Path.extension(file).toLowerCase();
 		if (Script.scriptExtensions.contains(ext))
-			scripts.add(Script.create(file, useLua));
+			scripts.add(Script.create(file #if ENABLE_LUA , useLua, {instance: this, parent: this} #end));
 	}
 
 	// GETTERS & SETTERS

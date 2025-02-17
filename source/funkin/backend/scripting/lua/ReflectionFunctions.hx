@@ -1,13 +1,15 @@
 package funkin.backend.scripting.lua;
 
+import funkin.backend.scripting.lua.utils.ILuaScriptable;
+
 #if ENABLE_LUA
 final class ReflectionFunctions
 {
-	public static function getReflectFunctions(instance:MusicBeatState, ?script:LuaScript):Map<String, Dynamic>
+	public static function getReflectFunctions(instance:ILuaScriptable, ?script:LuaScript):Map<String, Dynamic>
 	{
 		return [
 			"getField" => function(field:String) {
-				var obj = instance;
+				var obj = instance.getInstance();
 				
 				if(obj == null) return null;
 
@@ -21,7 +23,7 @@ final class ReflectionFunctions
 				return LuaTools.getValueFromVariable(obj, field);
 			},
 			"getArrayField" => function(field:String, index:Int, arrayField:String) {
-				var obj = instance;
+				var obj = instance.getInstance();
 				var arr:Dynamic = null;
 				var fieldIndex:Null<Int> = null;
 				if(obj == null) return null;
@@ -68,7 +70,7 @@ final class ReflectionFunctions
 				return value;
 			},
 			"setField" => function(field:String, value:Dynamic) {
-				var obj:Dynamic = instance;
+				var obj:Dynamic = instance.getInstance();
 
 				if (obj == null) return null;
 
@@ -82,7 +84,7 @@ final class ReflectionFunctions
 				return LuaTools.setValueToVariable(obj, field, value);
 			},
 			"setArrayField" => function(field:String, index:Int, arrayField:String, value:Dynamic) {
-				var obj:Dynamic = instance;
+				var obj:Dynamic = instance.getInstance();
 				var arr:Dynamic = null;
 				var fieldIndex:Null<Int> = null;
 				if(obj == null) return null;
@@ -124,7 +126,7 @@ final class ReflectionFunctions
 				return LuaTools.setValueToVariable(cl, field, value);
 			},
 			"callMethod" => function(func:String, ?args:Array<Dynamic>) {
-				var obj = instance;
+				var obj = instance.getInstance();
 				if(obj == null) return null;
 				var func = LuaTools.getValueFromVariable(obj, func);
 				if(!Reflect.isFunction(func)) return null;

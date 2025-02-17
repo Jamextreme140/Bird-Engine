@@ -42,7 +42,7 @@ class DialogueCutscene extends Cutscene {
 		dialogueCamera.bgColor = 0;
 		FlxG.cameras.add(dialogueCamera, false);
 
-		dialogueScript = Script.create(Paths.script(Path.withoutExtension(dialoguePath), null, dialoguePath.startsWith('assets')));
+		dialogueScript = Script.create(Paths.script(Path.withoutExtension(dialoguePath), null, dialoguePath.startsWith('assets')) #if ENABLE_LUA , true, {instance: this, parent: this} #end);
 		dialogueScript.setParent(cutscene = this);
 		dialogueScript.load();
 	}

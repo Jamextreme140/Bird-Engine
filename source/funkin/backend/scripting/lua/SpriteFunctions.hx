@@ -3,12 +3,13 @@ package funkin.backend.scripting.lua;
 import flixel.util.FlxColor;
 import flixel.text.FlxText;
 
+import funkin.backend.scripting.lua.utils.ILuaScriptable;
 import funkin.backend.scripting.events.PlayAnimEvent.PlayAnimContext;
 import funkin.game.Character;
 
 final class SpriteFunctions {
 	
-	public static function getSpriteFunctions(instance:MusicBeatState, ?script:Script):Map<String, Dynamic> {
+	public static function getSpriteFunctions(instance:ILuaScriptable, ?script:Script):Map<String, Dynamic> {
 		return [
 			"createSprite" => function(name:String, ?imagePath:String = null, ?x:Float = 0, ?y:Float = 0)
 			{

@@ -70,6 +70,10 @@ class Main extends Sprite
 
 		CrashHandler.init();
 
+		#if VIDEO_CUTSCENES
+		hxvlc.util.Handle.init(#if (hxvlc >= "1.8.0")  ['--no-lua', '--no-sub-autodetect-file'] #end);
+		#end
+
 		addChild(game = new FunkinGame(gameWidth, gameHeight, MainState, Options.framerate, Options.framerate, skipSplash, startFullscreen));
 
 		#if (!mobile && !web)

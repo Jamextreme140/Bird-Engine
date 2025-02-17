@@ -1,26 +1,33 @@
 package funkin.menus;
 
-import funkin.options.TreeMenu;
-import funkin.editors.charter.Charter;
-import funkin.backend.scripting.events.MenuChangeEvent;
-import funkin.options.OptionsMenu;
-import funkin.backend.scripting.events.PauseCreationEvent;
-import funkin.backend.scripting.events.NameEvent;
-import funkin.backend.scripting.Script;
 import flixel.sound.FlxSound;
 import flixel.text.FlxText;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
-import funkin.options.keybinds.KeybindsOptions;
-import funkin.menus.StoryMenuState;
+
+import funkin.editors.charter.Charter;
+import funkin.backend.scripting.events.MenuChangeEvent;
+import funkin.backend.scripting.events.PauseCreationEvent;
+import funkin.backend.scripting.events.NameEvent;
+import funkin.backend.scripting.Script;
 import funkin.backend.system.Conductor;
 import funkin.backend.utils.FunkinParentDisabler;
+import funkin.backend.FunkinText;
+import funkin.options.keybinds.KeybindsOptions;
+import funkin.options.TreeMenu;
+import funkin.options.OptionsMenu;
+import funkin.menus.StoryMenuState;
 
 class PauseSubState extends MusicBeatSubstate
 {
 	public static var script:String = "";
 
 	var grpMenuShit:FlxTypedGroup<Alphabet>;
+
+	var levelInfo:FunkinText;
+	var levelDifficulty:FunkinText;
+	var deathCounter:FunkinText;
+	var multiplayerText:FunkinText;
 
 	var menuItems:Array<String> = ['Resume', 'Restart Song', 'Change Controls', 'Change Options', 'Exit to menu', "Exit to charter"];
 	var curSelected:Int = 0;
@@ -47,7 +54,7 @@ class PauseSubState extends MusicBeatSubstate
 
 		add(parentDisabler = new FunkinParentDisabler());
 
-		pauseScript = Script.create(Paths.script(script));
+		pauseScript = Script.create(Paths.script(script) #if ENABLE_LUA , true, {instance: this, parent: this} #end);
 		pauseScript.setParent(this);
 		pauseScript.load();
 
@@ -55,7 +62,6 @@ class PauseSubState extends MusicBeatSubstate
 		pauseScript.call('create', [event]);
 
 		menuItems = event.options;
-
 
 		pauseMusic = FlxG.sound.load(Paths.music(event.music), 0, true);
 		pauseMusic.persist = false;
@@ -71,15 +77,13 @@ class PauseSubState extends MusicBeatSubstate
 		bg.scrollFactor.set();
 		add(bg);
 
-		var levelInfo:FlxText = new FlxText(20, 15, 0, PlayState.SONG.meta.displayName, 32);
-		var levelDifficulty:FlxText = new FlxText(20, 15, 0, PlayState.difficulty.toUpperCase(), 32);
-		var deathCounter:FlxText = new FlxText(20, 15, 0, "Blue balled: " + PlayState.deathCounter, 32);
-		var multiplayerText:FlxText = new FlxText(20, 15, 0, PlayState.opponentMode ? 'OPPONENT MODE' : (PlayState.coopMode ? 'CO-OP MODE' : ''), 32);
+		levelInfo = new FunkinText(20, 15, 0, PlayState.SONG.meta.displayName, 32, false);
+		levelDifficulty = new FunkinText(20, 15, 0, PlayState.difficulty.toUpperCase(), 32, false);
+		deathCounter = new FunkinText(20, 15, 0, "Blue balled: " + PlayState.deathCounter, 32, false);
+		multiplayerText = new FunkinText(20, 15, 0, PlayState.opponentMode ? 'OPPONENT MODE' : (PlayState.coopMode ? 'CO-OP MODE' : ''), 32, false);
 
 		for(k=>label in [levelInfo, levelDifficulty, deathCounter, multiplayerText]) {
 			label.scrollFactor.set();
-			label.setFormat(Paths.font('vcr.ttf'), 32);
-			label.updateHitbox();
 			label.alpha = 0;
 			label.x = FlxG.width - (label.width + 20);
 			label.y = 15 + (32 * k);

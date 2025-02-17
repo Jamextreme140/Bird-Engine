@@ -46,7 +46,7 @@ class VideoCutscene extends Cutscene {
 	public override function create() {
 		super.create();
 
-		// TODO: get vlc to stop autoloading those goddamn subtitles (use different file ext??)
+		// TODO: get vlc to stop autoloading those goddamn subtitles (use different file ext??). Just do ['--no-sub-autodetect-file']
 
 		cutsceneCamera = new FlxCamera();
 		cutsceneCamera.bgColor = 0;

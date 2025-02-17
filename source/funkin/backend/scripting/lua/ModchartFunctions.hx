@@ -120,7 +120,7 @@ final class ModchartFunctions {
 			"callback" => function(beat:Float, func:String, ?field:Int = -1) {
 				if(script.modchartManager != null) {
 					script.modchartManager.callback(beat, function(event) {
-						var callbackEvent = EventManager.get(CallbackEvent).recycle(func, event, event.name, event.target, event.beat, event.field, event.fired, event.active);
+						var callbackEvent = EventManager.get(CallbackEvent).recycle(func, event, event.name, event.target, event.beat, event.fired, event.active);
 						script.call('onModchartCallback', [callbackEvent]);
 					}, field);
 				}
@@ -131,7 +131,7 @@ final class ModchartFunctions {
 				if(script.modchartManager != null) {
 					script.modchartManager.repeater(beat, length, function(event) {
 						// TODO: make this cancellable
-						var callbackEvent = EventManager.get(CallbackEvent).recycle(func, event, event.name, event.target, event.beat, event.field, event.fired, event.active);
+						var callbackEvent = EventManager.get(CallbackEvent).recycle(func, event, event.name, event.target, event.beat, event.fired, event.active);
 						script.call('onRepeaterCallback', [callbackEvent, length]);
 					}, field);
 				}

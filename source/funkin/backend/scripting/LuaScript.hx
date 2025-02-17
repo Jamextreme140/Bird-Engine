@@ -1,5 +1,6 @@
 package funkin.backend.scripting;
 
+import funkin.backend.scripting.lua.utils.ILuaScriptable;
 import funkin.backend.scripting.events.CancellableEvent;
 import funkin.backend.scripting.lua.*;
 
@@ -38,11 +39,8 @@ class LuaScript extends Script{
 	var modchartManager:modchart.Manager;
 	#end
 	
-	public function new(path:String, ?fromSubstate:Bool = false) {
-		parent = {
-			instance: cast(FlxG.state, MusicBeatState),
-			parent: cast(FlxG.state, MusicBeatState)
-		};
+	public function new(path:String, ?parent:ParentObject) {
+		this.parent = parent;
 
 		super(path);
 		
@@ -55,11 +53,6 @@ class LuaScript extends Script{
 	
     public override function onCreate(path:String) {
 		super.onCreate(path);
-
-		parent = {
-			instance: cast(FlxG.state, MusicBeatState),
-			parent: cast(FlxG.state, MusicBeatState)
-		};
 
         state = LuaL.newstate();
 		Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(callback_handler));
@@ -111,22 +104,23 @@ class LuaScript extends Script{
 
     public override function onCall(funcName:String, args:Array<Dynamic>):Dynamic {
 		state.settop(0);
-        state.getglobal(funcName);
+		state.getglobal(funcName);
 
-        if (state.type(-1) != Lua.LUA_TFUNCTION)
-            return null;
-        
-        for (k=>val in args)
-            pushArg(val);
+		if (state.type(-1) != Lua.LUA_TFUNCTION)
+			return null;
 
-        if (state.pcall(args.length, 1, 0) != 0) {
-            this.error('${state.tostring(-1)}');
-            return null;
-        }
+		for (k => val in args)
+			pushArg(val);
 
-        var v = fromLua(state.gettop());
-        state.settop(0);
-        return v;
+		if (state.pcall(args.length, 1, 0) != 0)
+		{
+			this.error('${state.tostring(-1)}');
+			return null;
+		}
+
+		var v = fromLua(state.gettop());
+		state.settop(0);
+		return v;
     }
 
     public override function set(variable:String, value:Dynamic) {
@@ -166,6 +160,8 @@ class LuaScript extends Script{
 		for (k => e in CameraFunctions.getCameraFunctions(parent.instance, this))
 			addCallback(k, e);
 		for (k => e in NdllFunctions.getNdllFunctions(this))
+			addCallback(k, e);
+		for (k => e in StateFunctions.getStateFunctions(parent.instance, this))
 			addCallback(k, e);
 		for (k => e in OptionsVariables.getOptionsVariables(this))
 			set(k, e);
@@ -222,10 +218,10 @@ class LuaScript extends Script{
 
 	public function close()
 	{
-		this.active = false;
 		if(state == null) {
 			return;
 		}
+		this.active = false;
 		state.close();
 		state = null;
 		funkin.backend.system.framerate.LuaInfo.luaCount -= 1;
@@ -233,13 +229,13 @@ class LuaScript extends Script{
 
 	static inline function print_function(s:String) : Int {
 		if (Script.curScript != null)
-            Script.curScript.trace(s);
+			Script.curScript.trace(s);
 		return 0;
 	}
 
 	public function fromLua(stackPos:Int):Dynamic {
 		var ret:Any = null;
-        switch(state.type(stackPos)) {
+		switch (state.type(stackPos)) {
 			case Lua.LUA_TNIL:
 				ret = null;
 			case Lua.LUA_TBOOLEAN:
@@ -252,7 +248,7 @@ class LuaScript extends Script{
 				ret = toHaxeObj(stackPos);
 			case Lua.LUA_TFUNCTION: // From https://github.com/DragShot/linc_luajit/
 				null;
-				//ret = new LuaCallback(state, state.ref(Lua.LUA_REGISTRYINDEX));
+			// ret = new LuaCallback(state, state.ref(Lua.LUA_REGISTRYINDEX));
 			// case Lua.LUA_TUSERDATA:
 			// 	ret = LuaL.ref(l, Lua.LUA_REGISTRYINDEX);
 			// 	trace("userdata\n");
@@ -264,149 +260,162 @@ class LuaScript extends Script{
 			// 	trace("thread\n");
 			case idk:
 				ret = null;
-				trace("return value not supported\n"+Std.string(idk)+" - "+stackPos);
+				trace("return value not supported\n" + Std.string(idk) + " - " + stackPos);
 		}
 
-
-        if (ret is Dynamic && Reflect.hasField(ret, "__stack_id")) {
-            // A Stack Pointer is referenced.
-            var pos:Int = Reflect.field(ret, "__stack_id");
-            return stack[pos];
-        }
-        return ret;
+		if (ret is Dynamic && Reflect.hasField(ret, "__stack_id"))
+		{
+			// A Stack Pointer is referenced.
+			var pos:Int = Reflect.field(ret, "__stack_id");
+			return stack[pos];
+		}
+		return ret;
     }
 
 	public function pushArg(val:Dynamic) {
-        switch (Type.typeof(val)) {
-            case Type.ValueType.TNull:
-                state.pushnil();
-            case Type.ValueType.TBool:
-                state.pushboolean(val);
-            case Type.ValueType.TInt:
-                state.pushinteger(cast(val, Int));
-            case Type.ValueType.TFloat:
-                state.pushnumber(val);
-            case Type.ValueType.TClass(String):
-                state.pushstring(cast(val, String));
-            case Type.ValueType.TClass(Array):
-                var arr:Array<Any> = cast val;
-                var size:Int = arr.length;
-                state.createtable(size, 0);
+		switch (Type.typeof(val)) {
+			case Type.ValueType.TNull:
+				state.pushnil();
+			case Type.ValueType.TBool:
+				state.pushboolean(val);
+			case Type.ValueType.TInt:
+				state.pushinteger(cast(val, Int));
+			case Type.ValueType.TFloat:
+				state.pushnumber(val);
+			case Type.ValueType.TClass(String):
+				state.pushstring(cast(val, String));
+			case Type.ValueType.TClass(Array):
+				var arr:Array<Any> = cast val;
+				var size:Int = arr.length;
+				state.createtable(size, 0);
 
-                for (i in 0...size) {
-                    state.pushnumber(i + 1);
-                    pushArg(arr[i]);
-                    state.settable(-3);
-                }
-            case Type.ValueType.TObject:
-                @:privateAccess
-                state.objectToLua(val); // {}
-            default:
-                
-                var p:StackPointer = {
-                    __stack_id: lastStackID++,
-                };
-                state.toLua(p);
-                state.getmetatable("__funkinMetaTable");
-                state.setmetatable(-2);
-        
-                state.pushstring('__gc');
-                state.pushcfunction(cpp.Callable.fromStaticFunction(__gc));
-                state.settable(-3);
-
-                stack[p.__stack_id] = val;
-        }
+				for (i in 0...size)
+				{
+					state.pushnumber(i + 1);
+					pushArg(arr[i]);
+					state.settable(-3);
+				}
+			case Type.ValueType.TObject:
+				@:privateAccess
+				state.objectToLua(val); // {}
+			default:
+				setStackPointer(val);
+		}
     }
+
+	private function setStackPointer(val:Dynamic) {
+		if(state == null) return;
+
+		var p:StackPointer = {
+			__stack_id: lastStackID++,
+		};
+		state.toLua(p);
+		state.getmetatable("__funkinMetaTable");
+		state.setmetatable(-2);
+
+		state.pushstring('__gc');
+		state.pushcfunction(cpp.Callable.fromStaticFunction(__gc));
+		state.settable(-3);
+
+		stack[p.__stack_id] = val;
+	}
 
 	public static function __index(state:StatePointer):Int {
-        return callback_handler(cast cpp.Pointer.fromRaw(state).ref, "__onPointerIndex");
+		return callback_handler(cast cpp.Pointer.fromRaw(state).ref, "__onPointerIndex");
     }
     public static function __newindex(state:StatePointer):Int {
-        return callback_handler(cast cpp.Pointer.fromRaw(state).ref, "__onPointerNewIndex");
+		return callback_handler(cast cpp.Pointer.fromRaw(state).ref, "__onPointerNewIndex");
     }
     public static function __call(state:StatePointer):Int {
-        return callback_handler(cast cpp.Pointer.fromRaw(state).ref, "__onPointerCall");
+		return callback_handler(cast cpp.Pointer.fromRaw(state).ref, "__onPointerCall");
     }
     public static function __gc(state:StatePointer):Int {
-        // callbackPreventAutoConvert = true;
-        var v = callback_handler(cast cpp.Pointer.fromRaw(state).ref, "__gc");
-        // callbackPreventAutoConvert = false;
-        return v;
+		// callbackPreventAutoConvert = true;
+		var v = callback_handler(cast cpp.Pointer.fromRaw(state).ref, "__gc");
+		// callbackPreventAutoConvert = false;
+		return v;
     }
 
     public function onPointerIndex(obj:Dynamic, key:String) {
-		if (obj != null) {
-			if(obj is IHScriptCustomBehaviour)
+		if (obj != null)
+		{
+			if (obj is IHScriptCustomBehaviour)
 				return cast(obj, IHScriptCustomBehaviour).hget(key);
-			else 
+			else
 				return Reflect.getProperty(obj, key);
 		}
-		 
-        return null;
+
+		return null;
     }
 
 	public var onPointerCall:Dynamic;
 
     private function pointerCall(args:Array<Dynamic>) {
-		var obj = args.shift(); //Retrieves the referenced object
-        if (obj != null && Reflect.isFunction(obj))
-            return Reflect.callMethod(null, obj, args);
-        return null;
+		var obj = args.shift(); // Retrieves the referenced object
+		if (obj != null && Reflect.isFunction(obj))
+			return Reflect.callMethod(null, obj, args);
+		return null;
     }
 
     public function onPointerNewIndex(obj:Dynamic, key:String, val:Dynamic) {
-		if (key == "__gc") return null;
+		if (key == "__gc")
+			return null;
 
-        if (obj != null) {
-			if(obj is IHScriptCustomBehaviour)
+		if (obj != null)
+		{
+			if (obj is IHScriptCustomBehaviour)
 				cast(obj, IHScriptCustomBehaviour).hset(key, val);
 			else
-            	Reflect.setProperty(obj, key, val);
+				Reflect.setProperty(obj, key, val);
 		}
 
-        return null;
+		return null;
     }
 
     public function onGarbageCollection(obj:Dynamic) {
-        trace(obj);
-        if (Reflect.hasField(obj, "__stack_id")) {
-            trace('Clearing item ID: ${obj.__stack_id} from stack due to garbage collection');
-            stack.remove(obj.__stack_id);
-        }
+		trace(obj);
+		if (Reflect.hasField(obj, "__stack_id"))
+		{
+			trace('Clearing item ID: ${obj.__stack_id} from stack due to garbage collection');
+			stack.remove(obj.__stack_id);
+		}
     }
 
 	private static var callbackPreventAutoConvert:Bool = false;
 	
 	public static function callback_handler(l:State, fname:String):Int {
-
-        if (!(Script.curScript is LuaScript))
-            return 0;
-        var curLua:LuaScript = cast Script.curScript;
+		if (!(Script.curScript is LuaScript))
+			return 0;
+		var curLua:LuaScript = cast Script.curScript;
 
 		var cbf = curLua.luaCallbacks.get(fname);
-        callbackReturnVariables = [];
-        
-		if (cbf == null || !Reflect.isFunction(cbf)) {
+		callbackReturnVariables = [];
+
+		if (cbf == null || !Reflect.isFunction(cbf))
+		{
 			return 0;
 		}
 
 		var nparams:Int = Lua.gettop(l);
-		var args:Array<Dynamic> = callbackPreventAutoConvert ? [for(i in 0...nparams) l.fromLua(-nparams + i)] : [for(i in 0...nparams) curLua.fromLua(-nparams + i)];
+		var args:Array<Dynamic> = [for (i in 0...nparams) callbackPreventAutoConvert ? l.fromLua(-nparams + i) : curLua.fromLua(-nparams + i) ];
 
 		var ret:Dynamic = null;
 
-        try {
-            ret = (nparams > 0) ? Reflect.callMethod(null, cbf, args) : cbf();
-        } catch(e) {
-            curLua.error(e.details()); // for super cool mega logging!!!
-            throw e;
-        }
-        Lua.settop(l, 0);
+		try
+		{
+			ret = (nparams > 0) ? Reflect.callMethod(null, cbf, args) : cbf();
+		}
+		catch (e)
+		{
+			curLua.error(e.details()); // for super cool mega logging!!!
+			throw e;
+		}
+		Lua.settop(l, 0);
 
-        if (callbackReturnVariables.length <= 0)
-            callbackReturnVariables.push(ret);
-        for(e in callbackReturnVariables)
-            curLua.pushArg(e);
+		if (callbackReturnVariables.length <= 0)
+			callbackReturnVariables.push(ret);
+		for (e in callbackReturnVariables)
+			curLua.pushArg(e);
 
 		/* return the number of results */
 		return callbackReturnVariables.length;
@@ -453,7 +462,7 @@ class LuaScript extends Script{
 
 typedef ParentObject =
 {
-	var instance:MusicBeatState;
+	var instance:ILuaScriptable;
 	var parent:Dynamic;
 	var ?parentFields:Array<String>;
 }

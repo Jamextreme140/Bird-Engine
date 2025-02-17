@@ -1,10 +1,11 @@
 package funkin.backend.scripting.lua;
 
+import funkin.backend.scripting.lua.utils.ILuaScriptable;
 import funkin.menus.credits.CreditsMain;
 import funkin.menus.*;
 
 final class StateFunctions {
-	public static function getStateFunctions(?script:Script):Map<String, Dynamic> {
+	public static function getStateFunctions(instance:ILuaScriptable, ?script:Script):Map<String, Dynamic> {
 		return [
 			"switchState" => function(state:String, ?data:Dynamic) {
 				switch(state.toLowerCase()) {
@@ -21,11 +22,20 @@ final class StateFunctions {
 					case "creditsstate" | "creditsmain" | "credits":
 						FlxG.switchState(new CreditsMain());
 					default:
-						FlxG.switchState(new ModState(state, data ?? null));
+						FlxG.switchState(new ModState(state, data != null ? data : null));
 				}
 			},
 			"resetState" => function() {
 				FlxG.resetState();
+			},
+			"openSubState" => function(substate:String, ?data:Dynamic) {
+				switch(substate.toLowerCase()) {
+					case "pausemenusubstate" | "pausemenu" | "pause":
+						if(PlayState.instance != null) PlayState.instance.pauseGame();
+					default:
+						instance.openSubState(new ModSubState(substate, data != null ? data : null));
+				}
+				
 			}
 		];
 	}

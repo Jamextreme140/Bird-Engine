@@ -75,7 +75,6 @@ function beatHit(curBeat)
 
 	if curBeat == 32 then
 		cancelTween('fabitween')
-		resetSkew()
 		factor = 1
 	end
 end

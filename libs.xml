@@ -17,8 +17,9 @@
 
 	<!-- Documentation and other features -->
 	<git name="away3d" url="https://github.com/CodenameCrew/away3d" />
-	<git name="FunkinModchart" url="https://github.com/TheoDevelops/FunkinModchart" skipDeps="true"/>
+	<git name="FunkinModchart" url="https://github.com/TheoDevelops/FunkinModchart" ref="dev" skipDeps="true"/>
 	<!-- <lib name="dox" /> -->
 	<lib name="format" />
 	<lib name="markdown" />
+	<lib name="nape-haxe4" />
 </libraries>

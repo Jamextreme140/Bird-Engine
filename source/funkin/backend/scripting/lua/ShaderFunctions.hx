@@ -1,9 +1,10 @@
 package funkin.backend.scripting.lua;
 #if ENABLE_LUA
 import funkin.backend.scripting.lua.shaders.LuaShader;
+import funkin.backend.scripting.lua.utils.ILuaScriptable;
 
 final class ShaderFunctions {
-	public static function getShaderFunctions(instance:MusicBeatState, ?script:Script):Map<String, Dynamic> {
+	public static function getShaderFunctions(instance:ILuaScriptable, ?script:Script):Map<String, Dynamic> {
 		return [
 			"initShader" => function(name:String, shader:String, ?glslVersion:Int = 120) {
 				if(!Options.gameplayShaders) return;

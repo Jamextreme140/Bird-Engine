@@ -15,7 +15,8 @@ class ScriptedCutscene extends Cutscene {
 	public function new(scriptPath:String, callback:Void->Void) {
 		super(callback);
 
-		script = Script.create(this.scriptPath = scriptPath);
+		this.scriptPath = scriptPath;
+		script = Script.create(scriptPath #if ENABLE_LUA , true, {instance: this, parent: this} #end);
 		script.setPublicMap(PlayState.instance.scripts.publicVariables);
 		script.setParent(this);
 		script.load();
@@ -23,9 +24,9 @@ class ScriptedCutscene extends Cutscene {
 
 	public override function create() {
 		super.create();
-		trace("fuck you");
+		trace(">:3");
 		script.call("create");
-		if (Std.isOfType(script, DummyScript)) {
+		if (script is DummyScript) {
 			Logs.trace('Could not find script for scripted cutscene at ${scriptPath}', ERROR, RED);
 			close();
 		}

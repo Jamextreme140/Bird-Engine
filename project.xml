@@ -5,7 +5,7 @@
 		title="Friday Night Funkin' - Bird Engine" main="funkin.backend.system.Main"
 		file="BirdEngine" packageName="com.jamextreme140.birdengine"
 		package="com.jamextreme140.birdengine"
-		version="1.5.1" company="Jamextreme140" />
+		version="1.5.2" company="Jamextreme140" />
 
 	<!--
 		CHANGE THE SAVE PATH & NAME FOR YOUR MOD HERE!
@@ -66,6 +66,12 @@
 
 	<assets path='mods' rename='mods' embed='false'/>
 	<assets path='art/readme.txt' rename='do NOT readme.txt' />
+
+	<!-- OpenAL config -->
+	<section if="desktop">
+		<assets path="alsoft.txt" rename="plugins/alsoft.ini" type="text" if="windows"/>
+		<assets path="alsoft.txt" rename="plugins/alsoft.conf" type="text" unless="windows"/>
+	</section>
 
 	<!-- ______________________________ Haxedefines _____________________________ -->
 
@@ -139,6 +145,9 @@
 	<!-- Comment this out to disable support for Away3D Flixel Intergration (reduces compile times)-->
 	<define name="THREE_D_SUPPORT" />
 
+	<!-- Comment this out to disable support for Nape integration (flixel.addons.nape) (reduces compile times) !-->
+	<define name="NAPE_ENABLED" />
+
 	<!-- Comment this out to disable the use of luajit. !-->
 	<define name="ENABLE_LUA" if="windows || mac || linux"/>
 
@@ -189,6 +198,7 @@
 	<haxelib name="away3d" if="THREE_D_SUPPORT" />
 	<haxelib name="format" />
 	<haxelib name="flxanimate" />
+	<haxelib name="nape-haxe4" if="NAPE_ENABLED"/>
 
 	<haxelib name="hscript-improved" />
 	<haxelib name="linc_luajit" if="ENABLE_LUA" />

@@ -1,8 +1,10 @@
 package funkin.backend.scripting.lua;
 
+import funkin.backend.scripting.lua.utils.ILuaScriptable;
 import flixel.util.FlxColor;
 import flixel.tweens.FlxTween.FlxTweenType;
 
+using Lambda;
 class LuaTools {
 	public static function printFuncMsg(func:String, msg:String, type:Level, ?hint:String) {
 		Logs.trace('${func}(): ${msg}. ${hint.getDefault('')}', type);
@@ -17,7 +19,7 @@ class LuaTools {
 		#end
 	}
 
-	public static function getCamera(camera:String, ?instance:MusicBeatState):FlxCamera {
+	public static function getCamera(camera:String, ?instance:ILuaScriptable):FlxCamera {
 		return switch(camera.trim().toLowerCase()) {
 			case "camgame" | "game": PlayState.instance.camGame;
 			case "camhud" | "hud": PlayState.instance.camHUD;
@@ -104,7 +106,7 @@ class LuaTools {
 		return LuaTools.setValueToVariable(arrayValue, variable, value);
 	}
 
-	public static function getObject(instance:MusicBeatState, objectName:String):Dynamic
+	public static function getObject(instance:ILuaScriptable, objectName:String):Dynamic
 	{
 		var varSplit = objectName.split('.');
 
@@ -113,7 +115,7 @@ class LuaTools {
 		return object;
 	}
 
-	public static function getLuaObject(instance:MusicBeatState, name:String):Dynamic {
+	public static function getLuaObject(instance:ILuaScriptable, name:String):Dynamic {
 		var object:Dynamic = null;
 
 		if(instance.luaObjects["SPRITE"].exists(name)) {
@@ -126,13 +128,13 @@ class LuaTools {
 			object = instance.luaObjects["VIDEOS"].get(name);
 		}
 		else if(object == null) {
-			object = Reflect.getProperty(instance, name);
+			object = Reflect.getProperty(instance.getInstance(), name);
 		}
 
 		return object;
 	}
 
-	public static function removeLuaObject(instance:MusicBeatState, name:String) {
+	public static function removeLuaObject(instance:ILuaScriptable, name:String) {
 		if(instance.luaObjects["SPRITE"].exists(name)) {
 			instance.luaObjects["SPRITE"].remove(name);
 		}
@@ -144,52 +146,14 @@ class LuaTools {
 		}
 	}
 
-	public static function getEase(?ease:String = 'linear'):EaseFunction
+	// Uses a cache to improve performance
+	private static var easeFunctions = Type.getClassFields(FlxEase).filter((field:String) -> return Reflect.isFunction(Reflect.field(FlxEase, field)));
+
+	public static function getEase(ease:String):EaseFunction
 	{
-		/*
-		return switch(ease.toLowerCase().trim()) {
-			case 'backin': FlxEase.backIn;
-			case 'backinout': FlxEase.backInOut;
-			case 'backout': FlxEase.backOut;
-			case 'bouncein': FlxEase.bounceIn;
-			case 'bounceinout': FlxEase.bounceInOut;
-			case 'bounceout': FlxEase.bounceOut;
-			case 'circin': FlxEase.circIn;
-			case 'circinout': FlxEase.circInOut;
-			case 'circout': FlxEase.circOut;
-			case 'cubein': FlxEase.cubeIn;
-			case 'cubeinout': FlxEase.cubeInOut;
-			case 'cubeout': FlxEase.cubeOut;
-			case 'elasticin': FlxEase.elasticIn;
-			case 'elasticinout': FlxEase.elasticInOut;
-			case 'elasticout': FlxEase.elasticOut;
-			case 'expoin': FlxEase.expoIn;
-			case 'expoinout': FlxEase.expoInOut;
-			case 'expoout': FlxEase.expoOut;
-			case 'quadin': FlxEase.quadIn;
-			case 'quadinout': FlxEase.quadInOut;
-			case 'quadout': FlxEase.quadOut;
-			case 'quartin': FlxEase.quartIn;
-			case 'quartinout': FlxEase.quartInOut;
-			case 'quartout': FlxEase.quartOut;
-			case 'quintin': FlxEase.quintIn;
-			case 'quintinout': FlxEase.quintInOut;
-			case 'quintout': FlxEase.quintOut;
-			case 'sinein': FlxEase.sineIn;
-			case 'sineinout': FlxEase.sineInOut;
-			case 'sineout': FlxEase.sineOut;
-			case 'smoothstepin': FlxEase.smoothStepIn;
-			case 'smoothstepinout': FlxEase.smoothStepInOut;
-			case 'smoothstepout': FlxEase.smoothStepInOut;
-			case 'smootherstepin': FlxEase.smootherStepIn;
-			case 'smootherstepinout': FlxEase.smootherStepInOut;
-			case 'smootherstepout': FlxEase.smootherStepOut;
-			default: FlxEase.linear;
-		}
-		*/
-		if(ease.trim().length <= 0) ease = 'linear';
-		var easeToUse:EaseFunction = Reflect.field(FlxEase, ease);
-		return easeToUse.getDefault(FlxEase.linear);
+		var realEase = easeFunctions.find((e:String) -> return e.toLowerCase() == ease.toLowerCase().trim()).getDefault('linear');
+		var easeToUse:EaseFunction = Reflect.field(FlxEase, realEase);
+		return easeToUse;
 	}
 
 	public static function getTweenType(type:String):Int {

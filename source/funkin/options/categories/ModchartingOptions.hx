@@ -10,7 +10,7 @@ class ModchartingOptions extends OptionsScreen {
 			1, // minimum
 			128, // maximum
 			1, // change
-			"hold_subs" // save name
+			"modchartingHoldSubdivisions" // save name
 			)); // callback
 	}
 }

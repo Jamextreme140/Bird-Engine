@@ -1,7 +1,9 @@
 package funkin.backend.scripting.lua;
 
+import funkin.backend.scripting.lua.utils.ILuaScriptable;
+
 class HScriptFunctions {
-	public static function getHScriptFunctions(?instance:MusicBeatState, ?script:Script):Map<String, Dynamic> {
+	public static function getHScriptFunctions(?instance:ILuaScriptable, ?script:Script):Map<String, Dynamic> {
 		#if ENABLE_LUA
 		return [
 			"executeScript"	=> function(name:String, code:String) {

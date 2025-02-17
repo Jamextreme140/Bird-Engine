@@ -46,7 +46,7 @@ class Stage extends FlxBasic implements IBeatReceiver {
 		catch(e) Logs.trace('Couldn\'t load stage "$stage": ${e.message}', ERROR);
 
 		if (PlayState.instance != null) {
-			stageScript = Script.create(Paths.script('data/stages/$stage'));
+			stageScript = Script.create(Paths.script('data/stages/$stage') #if ENABLE_LUA , true, {instance: PlayState.instance == null ? cast FlxG.state : PlayState.instance, parent: this} #end);
 			PlayState.instance.scripts.add(stageScript);
 			stageScript.load();
 		}

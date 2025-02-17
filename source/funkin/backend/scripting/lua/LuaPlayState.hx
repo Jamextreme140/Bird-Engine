@@ -39,7 +39,7 @@ final class LuaPlayState {
 
 			"botPlay" 		=> PlayState.instance.playerStrums?.cpu ?? false,
 			
-			// TODO: playerStrum/opponentStrum position
+			// TODO: remove safe navigation operator and null coalescing
 			// Haxe 4.3.0+ null checks
 			"boyfriendName" => PlayState.SONG.strumLines[1]?.characters[0],
 			"boyfriendX" 	=> PlayState.instance.stage.characterPoses['boyfriend'].x,

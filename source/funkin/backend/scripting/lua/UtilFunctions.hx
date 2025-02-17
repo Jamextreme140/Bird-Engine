@@ -1,11 +1,11 @@
 package funkin.backend.scripting.lua;
 
 import funkin.backend.scripting.lua.events.TimerEvent;
-import funkin.backend.scripting.events.DynamicEvent;
+import funkin.backend.scripting.lua.utils.ILuaScriptable;
 import flixel.util.FlxTimer;
 
 final class UtilFunctions {
-	public static function getUtilFunctions(instance:MusicBeatState, ?script:Script):Map<String, Dynamic> {
+	public static function getUtilFunctions(instance:ILuaScriptable, ?script:Script):Map<String, Dynamic> {
 		return [
 			"callInstanceFunction" => function(func:String, ?args:Array<Dynamic>) {
 				instance.call(func, args);

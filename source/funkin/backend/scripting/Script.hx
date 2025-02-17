@@ -5,6 +5,8 @@ import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import haxe.io.Path;
 import hscript.IHScriptCustomConstructor;
 import flixel.util.FlxStringUtil;
+import funkin.backend.scripting.lua.utils.ILuaScriptable;
+import funkin.backend.scripting.LuaScript.ParentObject;
 
 @:allow(funkin.backend.scripting.ScriptPack)
 /**
@@ -146,7 +148,7 @@ class Script extends FlxBasic implements IFlxDestroyable {
 	 * Creates a script from the specified asset path. The language is automatically determined.
 	 * @param path Path in assets
 	 */
-	public static function create(path:String, ?useLua:Bool = false):Script {
+	public static function create(path:String, ?useLua:Bool = false, ?parent:ParentObject):Script {
 		if (Assets.exists(path)) {
 			return switch(Path.extension(path).toLowerCase()) {
 				case "hx" | "hscript" | "hsc" | "hxs" | "hxc":
@@ -157,7 +159,7 @@ class Script extends FlxBasic implements IFlxDestroyable {
 				case "lua":
 					#if ENABLE_LUA
 					if(useLua)
-						new LuaScript(path);
+						new LuaScript(path, parent);
 					else {
 						Logs.trace("Lua not available. Use HScript instead.", ERROR);
 						new DummyScript(path);
@@ -178,14 +180,14 @@ class Script extends FlxBasic implements IFlxDestroyable {
 	 * @param code code
 	 * @param path filename
 	 */
-	public static function fromString(code:String, path:String, ?useLua:Bool = false):Script {
+	public static function fromString(code:String, path:String, ?useLua:Bool = false, ?parent:ParentObject):Script {
 		return switch(Path.extension(path).toLowerCase()) {
 			case "hx" | "hscript" | "hsc" | "hxs" | "hxc":
 				new HScript(path).loadFromString(code);
 			case "lua":
 				#if ENABLE_LUA
 				if(useLua)
-					new LuaScript(path).loadFromString(code);
+					new LuaScript(path, parent).loadFromString(code);
 				else {
 					Logs.trace("Lua not available. Use HScript instead.", ERROR);
 					new DummyScript(path).loadFromString(code);

@@ -55,7 +55,7 @@ class GameOverSubstate extends MusicBeatSubstate
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.stop();
 
-		gameoverScript = Script.create(Paths.script(script));
+		gameoverScript = Script.create(Paths.script(script) #if ENABLE_LUA , true, {instance: this, parent: this} #end);
 		gameoverScript.setParent(this);
 		gameoverScript.load();
 

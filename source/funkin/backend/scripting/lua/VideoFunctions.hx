@@ -3,8 +3,10 @@ package funkin.backend.scripting.lua;
 import flixel.util.FlxTimer;
 import hxvlc.flixel.FlxVideoSprite;
 
+import funkin.backend.scripting.lua.utils.ILuaScriptable;
+
 class VideoFunctions {
-	public static function getVideoFunctions(instance:MusicBeatState, ?script:Script):Map<String, Dynamic> {
+	public static function getVideoFunctions(instance:ILuaScriptable, ?script:Script):Map<String, Dynamic> {
 		return [
 			"createVideo" => function(name:String, ?videoPath:String = null, ?ext:String = "mp4", ?x:Float = 0, ?y:Float = 0) {
 				if(instance.luaObjects["VIDEOS"].exists(name))

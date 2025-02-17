@@ -2,8 +2,10 @@ package funkin.backend.scripting.lua;
 
 import flixel.sound.FlxSound;
 
+import funkin.backend.scripting.lua.utils.ILuaScriptable;
+
 final class SoundFunctions {
-	public static function getSoundFunctions(instance:MusicBeatState, ?script:Script):Map<String, Dynamic> {
+	public static function getSoundFunctions(instance:ILuaScriptable, ?script:Script):Map<String, Dynamic> {
 		return [
 			"playSound" => function(name:String, file:String, ?volume:Float = 100, ?looped:Bool = false, ?destroy:Bool = true) {
 				var finalVolume:Float = FlxMath.bound(volume, 0, 100) / 100;
