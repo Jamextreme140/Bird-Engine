@@ -1,5 +1,8 @@
 package funkin.editors.character;
 
+import haxe.xml.Access;
+
+import flixel.group.FlxGroup;
 import funkin.game.Character;
 import funkin.backend.utils.XMLUtil.AnimData;
 
@@ -7,7 +10,7 @@ typedef CharacterCreationData = {
 	var anim:Array<AnimData>;
 }
 
-// TODO: choice between player and opponent type character
+// TODO: optimize this
 class CharacterCreationScreen extends UISubstateWindow {
 	public static var instance:CharacterCreationScreen = null;
 	
@@ -38,14 +41,34 @@ class CharacterCreationScreen extends UISubstateWindow {
 
 	public var onSave:(xml:Xml) -> Void = null;
 
+	var chooseTypeGroup:FlxGroup;
+	var mainPage:FlxGroup;
+
+	var charType:Int = 0; // 0 = opponent, 1 = player
+	var playerButton:UIButton;
+	var opponentButton:UIButton;
+	var chooseDesc:UIText;
+
 	var curData:CharacterCreationData;
-	private var opponentTemplate:String = 
-	'<character isPlayer="false" flipX="false" holdTime="4" color="#AF66CE">
+	var opponentTemplate:String = 
+	'<character sprite="dad" icon="dad" isPlayer="false" flipX="false" holdTime="4" color="#AF66CE">
 		<anim name="idle"      anim="Dad idle dance"      fps="24" loop="false" x="0" y="0"/>
 		<anim name="singUP"    anim="Dad Sing note UP"    fps="24" loop="false" x="-6" y="50"/>
 		<anim name="singLEFT"  anim="dad sing note right"  fps="24" loop="false" x="-10" y="10"/>
 		<anim name="singRIGHT" anim="Dad Sing Note LEFT" fps="24" loop="false" x="0" y="27"/>
 		<anim name="singDOWN"  anim="Dad Sing Note DOWN"  fps="24" loop="false" x="0" y="-30"/>
+	</character>';
+	var playerTemplate:String = 
+	'<character sprite="bf" flipX="true" isPlayer="true" icon="bf" holdTime="4" color="#31B0D1">
+		<anim name="idle" anim="BF idle dance" x="-5" y="0" fps="24" loop="false"/>
+		<anim name="singUP" anim="BF NOTE UP0" x="-39" y="27" fps="24" loop="false"/>
+		<anim name="singLEFT" anim="BF NOTE LEFT0" x="6" y="-7" fps="24" loop="false"/>
+		<anim name="singRIGHT" anim="BF NOTE RIGHT0" x="-48" y="-6" fps="24" loop="false"/>
+		<anim name="singDOWN" anim="BF NOTE DOWN0" x="-17" y="-50" fps="24" loop="false"/>
+		<anim name="singUPmiss" anim="BF NOTE UP MISS" x="-35" y="27" fps="24" loop="false"/>
+		<anim name="singLEFTmiss" anim="BF NOTE LEFT MISS" x="6" y="19" fps="24" loop="false"/>
+		<anim name="singRIGHTmiss" anim="BF NOTE RIGHT MISS" x="-44" y="22" fps="24" loop="false"/>
+		<anim name="singDOWNmiss" anim="BF NOTE DOWN MISS" x="-16" y="-19" fps="24" loop="false"/>
 	</character>';
 
 	public function new(?character:Character, ?onSave:(xml:Xml) -> Void) {
@@ -65,67 +88,101 @@ class CharacterCreationScreen extends UISubstateWindow {
 
 		super.create();
 
+		mainPage = new FlxGroup();
+		add(mainPage);
+		mainPage.visible = false;
+		chooseTypeGroup = new FlxGroup();
+		add(chooseTypeGroup);
+
+		playerButton = new UIButton(windowSpr.x + 320, windowSpr.y + 320, 'Player', function() {
+			charType = 1;
+			playerButton.canBeHovered = playerButton.selectable = false;
+			opponentButton.canBeHovered = opponentButton.selectable = false;
+			chooseTypeGroup.visible = false;
+			initialize();
+			mainPage.visible = true;
+		}, 160);
+	
+		opponentButton = new UIButton(playerButton.x + playerButton.bWidth + 30, windowSpr.y + 320, 'Opponent/Extra', function() {
+			charType = 0;
+			playerButton.canBeHovered = playerButton.selectable = false;
+			opponentButton.canBeHovered = opponentButton.selectable = false;
+			chooseTypeGroup.visible = false;
+			initialize();
+			mainPage.visible = true;
+		}, 160);
+
+		chooseDesc = new UIText(playerButton.x - 28, playerButton.y - 70, 0, 'Choose the new character type:', 24);
+
+    	chooseTypeGroup.add(playerButton);
+    	chooseTypeGroup.add(opponentButton);
+    	chooseTypeGroup.add(chooseDesc);
+	}
+
+	private function initialize() {
 		function addLabelOn(ui:UISprite, text:String)
-			add(new UIText(ui.x, ui.y - 24, 0, text));
+			mainPage.add(new UIText(ui.x, ui.y - 24, 0, text));
+
+		var tempXML = new Access(Xml.parse(charType == 1 ? playerTemplate : opponentTemplate).firstElement());
 
 		var title:UIText;
-		add(title = new UIText(windowSpr.x + 20, windowSpr.y + 30 + 16, 0, "Sprite Data", 28));
+		mainPage.add(title = new UIText(windowSpr.x + 20, windowSpr.y + 30 + 16, 0, "Sprite Data", 28));
 
-		spriteTextBox = new UITextBox(title.x, title.y + title.height + 38, 'sprite', 200);
+		spriteTextBox = new UITextBox(title.x, title.y + title.height + 38, tempXML.has.sprite ? tempXML.att.sprite : 'sprite', 200);
 		spriteTextBox.onChange = (sprite:String) -> checkSpriteFile(sprite);
-		add(spriteTextBox);
+		mainPage.add(spriteTextBox);
 		addLabelOn(spriteTextBox, "Sprite");
 
-		iconTextBox = new UITextBox(spriteTextBox.x + 200 + 26, spriteTextBox.y, 'sprite-icon', 150);
+		iconTextBox = new UITextBox(spriteTextBox.x + 200 + 26, spriteTextBox.y,tempXML.has.icon ? tempXML.att.icon : 'sprite-icon', 150);
 		iconTextBox.onChange = (newIcon:String) -> updateIcon(newIcon);
-		add(iconTextBox);
+		mainPage.add(iconTextBox);
 		addLabelOn(iconTextBox, "Icon");
 
 		updateIcon('face');
 
 		gameOverCharTextBox = new UITextBox(iconTextBox.x + 150 + (75 + 12), iconTextBox.y, "bf-dead", 200);
 		gameOverCharTextBox.onChange = (sprite:String) -> checkSpriteFile(sprite);
-		add(gameOverCharTextBox);
+		mainPage.add(gameOverCharTextBox);
 		addLabelOn(gameOverCharTextBox, "Game Over Character");
 
 		antialiasingCheckbox = new UICheckbox(spriteTextBox.x, spriteTextBox.y + 10 + 32 + 28, "Antialiasing", true);
-		add(antialiasingCheckbox);
+		mainPage.add(antialiasingCheckbox);
 		addLabelOn(antialiasingCheckbox, "Antialiased");
 
-		flipXCheckbox = new UICheckbox(antialiasingCheckbox.x + 172, spriteTextBox.y + 10 + 32 + 28, "FlipX", false);
-		add(flipXCheckbox);
+		flipXCheckbox = new UICheckbox(antialiasingCheckbox.x + 172, spriteTextBox.y + 10 + 32 + 28, "FlipX", tempXML.has.flipX ? tempXML.att.flipX == "true" : false);
+		mainPage.add(flipXCheckbox);
 		addLabelOn(flipXCheckbox, "Flipped");
 
-		iconColorWheel = new UIColorwheel(gameOverCharTextBox.x + 200 + 20, gameOverCharTextBox.y, 0xFFFFFFFF);
-		add(iconColorWheel);
+		iconColorWheel = new UIColorwheel(gameOverCharTextBox.x + 200 + 20, gameOverCharTextBox.y, tempXML.has.color ? tempXML.att.color.getColorFromDynamic() : 0xFFFFFFFF);
+		mainPage.add(iconColorWheel);
 		addLabelOn(iconColorWheel, "Icon Color");
 
 		add(title = new UIText(spriteTextBox.x, spriteTextBox.y + 10 + 46 + 84, 0, "Character Data", 28));
 
 		positionXStepper = new UINumericStepper(title.x, title.y + title.height + 36, 0, 0.001, 2, null, null, 84);
-		add(positionXStepper);
+		mainPage.add(positionXStepper);
 		addLabelOn(positionXStepper, "Position (X,Y)");
 
-		add(new UIText(positionXStepper.x + 84 - 32 + 0, positionXStepper.y + 9, 0, ",", 22));
+		mainPage.add(new UIText(positionXStepper.x + 84 - 32 + 0, positionXStepper.y + 9, 0, ",", 22));
 
 		positionYStepper = new UINumericStepper(positionXStepper.x + 84 - 32 + 26, positionXStepper.y, 0, 0.001, 2, null, null, 84);
-		add(positionYStepper);
+		mainPage.add(positionYStepper);
 
 		cameraXStepper = new UINumericStepper(positionYStepper.x + 36 + 84 - 32, positionYStepper.y, 0, 0.001, 2, null, null, 84);
-		add(cameraXStepper);
+		mainPage.add(cameraXStepper);
 		addLabelOn(cameraXStepper, "Camera Position (X,Y)");
 
-		add(new UIText(cameraXStepper.x + 84 - 32 + 0, cameraXStepper.y + 9, 0, ",", 22));
+		mainPage.add(new UIText(cameraXStepper.x + 84 - 32 + 0, cameraXStepper.y + 9, 0, ",", 22));
 
 		cameraYStepper = new UINumericStepper(cameraXStepper.x + 84 - 32 + 26, cameraXStepper.y, 0, 0.001, 2, null, null, 84);
-		add(cameraYStepper);
+		mainPage.add(cameraYStepper);
 
 		scaleStepper = new UINumericStepper(cameraYStepper.x + 84 - 32 + 90, cameraYStepper.y, 1, 0.001, 2, null, null, 74);
-		add(scaleStepper);
+		mainPage.add(scaleStepper);
 		addLabelOn(scaleStepper, "Scale");
 
 		singTimeStepper = new UINumericStepper(scaleStepper.x + 74 - 32 + 36, scaleStepper.y, 4, 0.001, 2, null, null, 74);
-		add(singTimeStepper);
+		mainPage.add(singTimeStepper);
 		addLabelOn(singTimeStepper, "Sing Duration (Steps)");
 
 		animationsButtonList = new UIButtonList<CharacterAnimInfoButton>(singTimeStepper.x + singTimeStepper.width + 200, singTimeStepper.y, 290, 200, '', FlxPoint.get(280, 35), null, 5);
@@ -137,37 +194,37 @@ class CharacterCreationScreen extends UISubstateWindow {
 				if(_ != null) addAnim(_);
 			}));
 		}
-		var tempXML = Xml.parse(opponentTemplate).firstElement();
+		
 		var c:Int = 0;
-		for (i in tempXML.elements())
+		for (i in tempXML.elements)
 		{
-			var animData = XMLUtil.extractAnimFromXML(new haxe.xml.Access(i));
+			var animData = XMLUtil.extractAnimFromXML(i);
 			addAnim(animData, c);
 			c++;
 		}
-		add(animationsButtonList);
+		mainPage.add(animationsButtonList);
 		addLabelOn(animationsButtonList, "Animations");
 
-		isPlayerCheckbox = new UICheckbox(positionXStepper.x, positionXStepper.y + 10 + 32 + 28, "isPlayer", false);
-		add(isPlayerCheckbox);
+		isPlayerCheckbox = new UICheckbox(positionXStepper.x, positionXStepper.y + 10 + 32 + 28, "isPlayer", tempXML.has.isPlayer ? tempXML.att.isPlayer == "true" : false);
+		mainPage.add(isPlayerCheckbox);
 		addLabelOn(isPlayerCheckbox, "Is Player");
 
 		isGFCheckbox = new UICheckbox(isPlayerCheckbox.x + 128, positionXStepper.y + 10 + 32 + 28, "isGF", false);
-		add(isGFCheckbox);
-		addLabelOn(isGFCheckbox, "Is GF");
+		mainPage.add(isGFCheckbox);
+		addLabelOn(isGFCheckbox, "Is GF (unused)");
 
 		for (checkbox in [isPlayerCheckbox, isGFCheckbox, antialiasingCheckbox, flipXCheckbox])
 			{checkbox.y += 4; checkbox.x += 6;}
 
 		scriptExtension = new UITextBox(250, 388, "", 200);
-		add(scriptExtension);
+		mainPage.add(scriptExtension);
 		addLabelOn(scriptExtension, "Script Extension");
 
 		isShortLived = new UICheckbox(scriptExtension.x, (scriptExtension.y + scriptExtension.bHeight) + 15, "isShortLived", true);
-		add(isShortLived);
+		mainPage.add(isShortLived);
 
 		loadBefore = new UICheckbox(isShortLived.x, isShortLived.y + 30, "loadBefore", false);
-		add(loadBefore);
+		mainPage.add(loadBefore);
 
 		saveButton = new UIButton(windowSpr.x + windowSpr.bWidth - 20, windowSpr.y + windowSpr.bHeight- 20, "Save & Close", function() {
 			buildCharacter();
@@ -184,8 +241,8 @@ class CharacterCreationScreen extends UISubstateWindow {
 		}, 125);
 		closeButton.x -= closeButton.bWidth;
 		closeButton.color = 0xFFFF0000;
-		add(closeButton);
-		add(saveButton);
+		mainPage.add(closeButton);
+		mainPage.add(saveButton);
 	}
 
 	function checkSpriteFile(sprite:String) {
@@ -293,8 +350,11 @@ class CharacterCreationScreen extends UISubstateWindow {
 			close();
 			FlxG.resetState();
 		});
-		var fullPath = sys.FileSystem.fullPath(Paths.xml('characters/character'));
-		fileDialog.browse(lime.ui.FileDialogType.SAVE, "*.xml", fullPath);
+		var charFolder = '${Paths.getAssetsRoot()}/data/characters';
+		trace('Saving on $charFolder');
+		var charFolderExists = sys.FileSystem.exists(charFolder);
+		if(!charFolderExists) CoolUtil.addMissingFolders(charFolder);
+		fileDialog.browse(lime.ui.FileDialogType.SAVE, "*.xml", sys.FileSystem.fullPath(charFolder + '/character.xml'), "Save Character");
 		if (onSave != null) onSave(xml);
 	}
 
