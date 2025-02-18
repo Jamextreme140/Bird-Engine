@@ -4,15 +4,17 @@
 
 ## CHECK THE [DOCUMENTATION](https://github.com/Jamextreme140/Bird-Engine/tree/main/docs/lua)
 
-Originally used on FNF Vs SC. This custom engine includes the following features
+Want to use Codename Engine but you want to use Lua (hi psych users :3) or are you still learning Haxe (for HScript)? This is the perfect fork to start with.
 
-- Full Lua Script support (non-Psych)
+Originally developed for FNF Vs SC. This custom engine includes the following features
+
+- Full Lua Script support **(Not compatible with Psych Lua)**
   - Gameplay Scripting
-  - Customizable States (and Custom States too)(Soon for substates)
-  - Modchart system by [TheoDevelops](https://github.com/TheoDevelops/CNEModchart-Framework) (soon...)
+  - Customizable States/Substates (and Custom ones too)
   - NDLL management
+- Modchart system by [TheoDevelops](https://github.com/TheoDevelops/CNEModchart-Framework)  
 
-**NOTE**: Due to the limited Lua flexibility, do not consider it as a Scripting replacement, but as a complement. Remember that the main scripting system of this engine is HScript.
+**NOTE**: Even with the improved Lua flexibility, do not consider it as a Scripting replacement, but as a complement. Remember that the main scripting system of this engine is HScript.
 
 Known issues in the beta:
 

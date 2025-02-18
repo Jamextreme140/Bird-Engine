@@ -6,5 +6,12 @@
 		"*.hscript": "haxe",
 		"*.hsc": "haxe",
 		"*.hxs": "haxe"
-	  }
+	},
+
+	"haxe.displayPort": "auto",
+	"haxe.enableCompilationServer": false,
+	"haxe.enableServerView": true,
+	"haxe.displayServer": {
+		"arguments": ["-v"]
+	}
 }
