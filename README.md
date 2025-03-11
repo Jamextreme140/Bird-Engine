@@ -12,7 +12,7 @@ Originally developed for FNF Vs SC. This custom engine includes the following fe
   - Gameplay Scripting
   - Customizable States/Substates (and Custom ones too)
   - NDLL management
-- Modchart system by [TheoDevelops](https://github.com/TheoDevelops/CNEModchart-Framework)  
+- Modchart system by [TheoDevelops](https://github.com/TheoDevelops/CNEModchart-Framework) (on early stage)
 
 **NOTE**: Even with the improved Lua flexibility, do not consider it as a Scripting replacement, but as a complement. Remember that the main scripting system of this engine is HScript.
 
