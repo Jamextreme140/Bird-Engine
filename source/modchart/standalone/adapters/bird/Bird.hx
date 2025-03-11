@@ -23,8 +23,6 @@ class Bird implements IAdapter {
 		for (strumLine in PlayState.instance.strumLines.members) {
 			strumLine.forEach(strum -> {
 				strum.extra.set('player', strumLine.ID);
-				// i guess ???
-				strum.extra.set('lane', strumLine.members.indexOf(strum));
 			});
 		}
 	}
@@ -72,9 +70,8 @@ class Bird implements IAdapter {
 			return note.strumID;
 		} else if (arrow is Strum) {
 			final strum:Strum = cast arrow;
-			return strum.extra.get('lane');
+			return strum.ID;
 		}
-
 		return 0;
 	}
 
@@ -117,10 +114,8 @@ class Bird implements IAdapter {
 		return 0;
 	}
 
-	public function getHoldSubdivisions():Int {
-		final val = Options.modchartingHoldSubdivisions;
-		return val < 1 ? 1 : val;
-	}
+	public function getHoldSubdivisions():Int
+		return 4;
 
 	public function getDownscroll():Bool {
 		return Options.downscroll;
@@ -146,7 +141,7 @@ class Bird implements IAdapter {
 	// 0 receptors
 	// 1 tap arrows
 	// 2 hold arrows
-	// 3 lane attachments
+	// 3 receptor attachments
 	public function getArrowItems() {
 		var pspr:Array<Array<Array<FlxSprite>>> = [];
 
@@ -157,8 +152,6 @@ class Bird implements IAdapter {
 
 			if (!sl.visible)
 				continue;
-
-			final splashHandler = PlayState.instance.splashHandler;
 
 			// this is somehow more optimized than how i used to do it (thanks neeo for the code!!)
 			pspr[i] = [];
