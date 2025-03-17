@@ -14,23 +14,25 @@ final class SpriteFunctions {
 			"createSprite" => function(name:String, ?imagePath:String = null, ?x:Float = 0, ?y:Float = 0)
 			{
 				if(instance.luaObjects["SPRITE"].exists(name))
-					return;
+					return null;
 				
 				var theSprite:FunkinSprite = new FunkinSprite(x, y);
 				if(imagePath != null && imagePath.length > 0)
 					theSprite.loadGraphic(Paths.image(imagePath));
 				instance.luaObjects["SPRITE"].set(name, theSprite);
-				cast(script, LuaScript).set(name, theSprite);
+				//cast(script, LuaScript).set(name, theSprite);
+				return theSprite;
 			},
 			"createText" => function(name:String, text:String = '', ?x:Float = 0, ?y:Float = 0, ?width:Float = 0, ?size:Int = 16, ?camera:String = 'default') {
 				if(instance.luaObjects["TEXT"].exists(name))
-					return;
+					return null;
 				
 				var yourText:FunkinText = new FunkinText(x, y, width, text, size);
 				yourText.scrollFactor.set();
 				yourText.cameras = [LuaTools.getCamera(camera, instance)];
 				instance.luaObjects["TEXT"].set(name, yourText);
-				cast(script, LuaScript).set(name, yourText);
+				//cast(script, LuaScript).set(name, yourText);
+				return yourText;
 			},
 			"setText" => function(name:String, text:String = '') {
 				var yourText:FunkinText = LuaTools.getObject(instance, name);
@@ -155,13 +157,14 @@ final class SpriteFunctions {
 		return [
 			"createAnimatedSprite" => function(name:String, ?imagePath:String, ?x:Float = 0, ?y:Float = 0) {
 				if (instance.luaObjects["SPRITE"].exists(name))
-					return;
+					return null;
 
 				var theSprite:FunkinSprite = new FunkinSprite(x, y);
 				if (imagePath != null && imagePath.length > 0)
 					theSprite.loadSprite(imagePath);
 				instance.luaObjects["SPRITE"].set(name, theSprite);
-				cast(script, LuaScript).set(name, theSprite);
+				//cast(script, LuaScript).set(name, theSprite);
+				return theSprite;
 			},
 			"addAnimationByPrefix" => function(name:String, anim:String, prefix:String, framerate:Int = 24, forced:Bool = false, type:String = 'none') {
 				if (instance.luaObjects["SPRITE"].exists(name))

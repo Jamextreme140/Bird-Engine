@@ -7,6 +7,8 @@ local ab = 0.005
 local ab1 = 0.0008
 local factor = 1
 
+local chrom
+
 function postCreate()
 	print("prePost")
 	createSprite('fabi', 'fabi', posX, 500);
@@ -16,7 +18,7 @@ function postCreate()
 
 	createText('luaText', 'Bird Engine', posX + 50, 90, 0, 27, 'camHUD')
 	addSprite('luaText', 'camHUD')
-	initShader('chrom', 'chromaticAberration')
+	chrom = initShader('chrom', 'chromaticAberration')
 	addShader('camGame', 'chrom')
 
 	print("created");

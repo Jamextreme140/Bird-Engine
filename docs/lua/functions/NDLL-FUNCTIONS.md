@@ -19,6 +19,8 @@ Sets a native function from a Haxe NDLL. Limited to 25 argument due to a limitat
 - func: Name of the function.
 - nArgs: Number of arguments of that function.
 
+Returns the native function.
+
 ### `callNativeFunction(funcName, args)`
 
 Calls an specified native function.

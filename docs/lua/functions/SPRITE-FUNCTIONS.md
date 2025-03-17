@@ -13,6 +13,8 @@ Creates a Sprite with a specific image.
 - x (opt.) = 0: Position on X (horizontal).
 - y (opt.) = 0: Position on Y (vertical).
 
+Returns the sprite reference.
+
 ## Animated sprites
 
 ### `createAnimatedSprite(name, imagePath, x, y)`
@@ -23,6 +25,8 @@ Creates an Animated Sprite with a specific path. Depending of the specified path
 - imagePath(optional): Image to load.
 - x (opt.) = 0: Position on X (horizontal).
 - y (opt.) = 0: Position on Y (vertical).
+
+Returns the sprite reference.
 
 ### `addAnimationByPrefix(name, anim, prefix, framerate, forced, type)`
 
@@ -88,6 +92,8 @@ Creates a Text.
 - width (opt.) = 0
 - size (opt.) = 16
 - camera (opt.) = 'default': the camera to be set. Example: camGame, camHUD or any camera created from `createCamera`
+
+Returns the text reference.
 
 ### `setText(name, text)`
 

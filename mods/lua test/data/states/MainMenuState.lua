@@ -4,6 +4,9 @@ local ab = 0.005
 local ab1 = 0.0008
 local bpm
 
+local fabi
+local chrom
+
 function new()
 	print('"new" constructor :3')
 end
@@ -13,7 +16,7 @@ function postCreate()
 
 	bpm = getClassField('funkin.backend.system.Conductor', 'bpm')
 
-	createSprite('fabi', 'fabi');
+	fabi = createSprite('fabi', 'fabi');
 	--fabi.x = posX
 	--fabi.y = 200
 	--callObjectMethod('fabi', 'setPosition', {posX, 200})
@@ -30,12 +33,13 @@ function postCreate()
 
 	createText('luaText', 'Bird Engine', posX, 500, 0, 27, 'default')
 	addSprite('luaText', 'default')
-	initShader('chrom', 'chromaticAberration')
+
+	chrom = initShader('chrom', 'chromaticAberration')
 	addShader('default', 'chrom')
 
 	print("created");
 
-	executeScript('testScript', [[
+	createScript('testScript', [[
 		trace("Hello from Lua through HScript ");
 		trace(">:3");
 	]]);
@@ -46,12 +50,16 @@ function beatHit(curBeat)
 	if(math.fmod(curBeat, 2) == 0 and not hasTween) then
 		--print(curBeat)
 		--shake('camHUD', 0.01, 0.1)
-		setShaderField('chrom', 'redOff', {ab1, 0})
-		setShaderField('chrom', 'blueOff', {-ab1, 0})
+		--setShaderField('chrom', 'redOff', {ab1, 0})
+		--setShaderField('chrom', 'blueOff', {-ab1, 0})
+		chrom.redOff = {ab1, 0}
+		chrom.blueOff = {-ab1, 0}
 		hasTween = true
 	elseif(math.fmod(curBeat, 4) == 0 and hasTween) then
-		setShaderField('chrom', 'redOff', {ab, 0})
-		setShaderField('chrom', 'blueOff', {-ab, 0})
+		--setShaderField('chrom', 'redOff', {ab, 0})
+		--setShaderField('chrom', 'blueOff', {-ab, 0})
+		chrom.redOff = {ab, 0}
+		chrom.blueOff = {-ab, 0}
 		hasTween = false
 	end
 

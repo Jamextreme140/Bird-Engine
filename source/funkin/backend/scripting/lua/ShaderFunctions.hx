@@ -7,17 +7,18 @@ final class ShaderFunctions {
 	public static function getShaderFunctions(instance:ILuaScriptable, ?script:Script):Map<String, Dynamic> {
 		return [
 			"initShader" => function(name:String, shader:String, ?glslVersion:Int = 120) {
-				if(!Options.gameplayShaders) return;
+				if(!Options.gameplayShaders) return null;
 
 				if(instance.luaObjects["SHADER"].exists(name)) {
 					Logs.trace('Shader ${name} already initialized', WARNING);
-					return;
+					return null;
 				}
 
 				var cShader = new LuaShader(shader, Std.string(glslVersion));
 
 				instance.luaObjects["SHADER"].set(name, cShader);
-				cast(script, LuaScript).set(name, cShader);
+				//cast(script, LuaScript).set(name, cShader);
+				return cShader;
 			},
 			"addShader" => function(object:String, shader:String) {
 				if(!Options.gameplayShaders) return;

@@ -10,7 +10,8 @@ final class NdllFunctions {
 			"setNativeFunction" => function(funcName:String, ndll:String, func:String, nArgs:Int) {
 				var func:Dynamic = NdllUtil.getFunction(ndll, func, Std.int(FlxMath.bound(nArgs, 0, 25)));
 				ndllFunctions.set(funcName, func);
-				cast(script, LuaScript).addCallback(funcName, func);
+				//cast(script, LuaScript).addCallback(funcName, func);
+				return func;
 			},
 			"callNativeFunction" => function(funcName:String, args:Array<Dynamic>) {
 				var func:Dynamic = ndllFunctions.get(funcName);

@@ -1,5 +1,6 @@
 package funkin.backend.scripting;
 
+#if ENABLE_LUA
 import funkin.backend.scripting.lua.utils.ILuaScriptable;
 import funkin.backend.scripting.events.CancellableEvent;
 import funkin.backend.scripting.lua.*;
@@ -10,7 +11,6 @@ import openfl.utils.Assets;
 
 import hscript.IHScriptCustomBehaviour;
 
-#if ENABLE_LUA
 import llua.State;
 import llua.Macro.*;
 import llua.LuaCallback;
@@ -24,11 +24,11 @@ using llua.Convert;
  * @see https://github.com/CodenameCrew/CodenameEngine/blob/lua-test/source/funkin/scripting/LuaScript.hx
  */
 class LuaScript extends Script{
-    public var state:State = null;
-	public var luaCallbacks:Map<String, Dynamic> = [];
-    public var stack:Map<Int, Dynamic> = [];
-	// BIG TODO: make substates work
-	public var parent:ParentObject;
+	public var state(default, null):State = null;
+	public var luaCallbacks(default, null):Map<String, Dynamic> = [];
+	public var stack(default, null):Map<Int, Dynamic> = [];
+
+	public var parent(default, null):ParentObject;
 
 	private var lastStackID:Int = 0;
 
@@ -38,6 +38,9 @@ class LuaScript extends Script{
 	@:allow(funkin.backend.scripting.lua.ModchartFunctions)
 	var modchartManager:modchart.Manager;
 	#end
+
+	// hscript
+	public var hscript(default, null):LuaHScript;
 	
 	public function new(path:String, ?parent:ParentObject) {
 		this.parent = parent;
@@ -54,8 +57,8 @@ class LuaScript extends Script{
     public override function onCreate(path:String) {
 		super.onCreate(path);
 
-        state = LuaL.newstate();
-		Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(callback_handler));
+		state = LuaL.newstate();
+		Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(callback_handler)); // TODO: move this since the callbacks function is static
 		state.openlibs();
 		Lua.register_hxtrace_func(cpp.Callable.fromStaticFunction(print_function));
 		state.register_hxtrace_lib();
@@ -63,27 +66,26 @@ class LuaScript extends Script{
 		onPointerCall = Reflect.makeVarArgs(pointerCall);
 
 		luaCallbacks["__onPointerIndex"] = onPointerIndex;
-        luaCallbacks["__onPointerNewIndex"] = onPointerNewIndex;
-        luaCallbacks["__onPointerCall"] = onPointerCall;
-        luaCallbacks["__gc"] = onGarbageCollection;
+		luaCallbacks["__onPointerNewIndex"] = onPointerNewIndex;
+		luaCallbacks["__onPointerCall"] = onPointerCall;
+		luaCallbacks["__gc"] = onGarbageCollection;
 
 		state.newmetatable("__funkinMetaTable");
 
-        state.pushstring('__index');
-        state.pushcfunction(cpp.Callable.fromStaticFunction(__index));
-        state.settable(-3);
-        
-        state.pushstring('__newindex');
-        state.pushcfunction(cpp.Callable.fromStaticFunction(__newindex));
-        state.settable(-3);
-        
-        state.pushstring('__call');
-        state.pushcfunction(cpp.Callable.fromStaticFunction(__call));
-        state.settable(-3);
+		state.pushstring('__index');
+		state.pushcfunction(cpp.Callable.fromStaticFunction(__index));
+		state.settable(-3);
 
-        state.setglobal("__funkinMetaTable");
-		
-		//set('chartingMode', PlayState.chartingMode);
+		state.pushstring('__newindex');
+		state.pushcfunction(cpp.Callable.fromStaticFunction(__newindex));
+		state.settable(-3);
+
+		state.pushstring('__call');
+		state.pushcfunction(cpp.Callable.fromStaticFunction(__call));
+		state.settable(-3);
+		state.setglobal("__funkinMetaTable");
+
+		// set('chartingMode', PlayState.chartingMode);
 
 		#if GLOBAL_SCRIPT
 		funkin.backend.scripting.GlobalScript.call("onScriptCreated", [null, "luascript"]);
@@ -123,12 +125,13 @@ class LuaScript extends Script{
 		return v;
     }
 
-    public override function set(variable:String, value:Dynamic) {
-		if(state == null) return;
+	public override function set(variable:String, value:Dynamic) {
+		if (state == null)
+			return;
 
-        pushArg(value);
-        state.setglobal(variable);
-    }
+		pushArg(value);
+		state.setglobal(variable);
+	}
 
 	function setCallbacks() {
 		if(parent.instance is PlayState) {
@@ -181,9 +184,9 @@ class LuaScript extends Script{
 		close();
 	}
 
-    public override function reload() {
-        Logs.trace('Hot-reloading is currently not supported on Lua.', WARNING);
-    }
+	public override function reload() {
+		Logs.trace('Hot-reloading is currently not supported on Lua.', WARNING);
+	}
 
     public override function setParent(variable:Dynamic) {
 		parent.parent = variable;
@@ -270,7 +273,7 @@ class LuaScript extends Script{
 			return stack[pos];
 		}
 		return ret;
-    }
+	}
 
 	public function pushArg(val:Dynamic) {
 		switch (Type.typeof(val)) {
@@ -301,11 +304,9 @@ class LuaScript extends Script{
 			default:
 				setStackPointer(val);
 		}
-    }
+	}
 
-	private function setStackPointer(val:Dynamic) {
-		if(state == null) return;
-
+	private inline function setStackPointer(val:Dynamic) {
 		var p:StackPointer = {
 			__stack_id: lastStackID++,
 		};
@@ -322,19 +323,22 @@ class LuaScript extends Script{
 
 	public static function __index(state:StatePointer):Int {
 		return callback_handler(cast cpp.Pointer.fromRaw(state).ref, "__onPointerIndex");
-    }
-    public static function __newindex(state:StatePointer):Int {
+	}
+
+	public static function __newindex(state:StatePointer):Int {
 		return callback_handler(cast cpp.Pointer.fromRaw(state).ref, "__onPointerNewIndex");
-    }
-    public static function __call(state:StatePointer):Int {
+	}
+
+	public static function __call(state:StatePointer):Int {
 		return callback_handler(cast cpp.Pointer.fromRaw(state).ref, "__onPointerCall");
-    }
-    public static function __gc(state:StatePointer):Int {
+	}
+
+	public static function __gc(state:StatePointer):Int {
 		// callbackPreventAutoConvert = true;
 		var v = callback_handler(cast cpp.Pointer.fromRaw(state).ref, "__gc");
 		// callbackPreventAutoConvert = false;
 		return v;
-    }
+	}
 
     public function onPointerIndex(obj:Dynamic, key:String) {
 		if (obj != null)
@@ -346,16 +350,16 @@ class LuaScript extends Script{
 		}
 
 		return null;
-    }
+	}
 
 	public var onPointerCall:Dynamic;
 
-    private function pointerCall(args:Array<Dynamic>) {
+	private function pointerCall(args:Array<Dynamic>) {
 		var obj = args.shift(); // Retrieves the referenced object
 		if (obj != null && Reflect.isFunction(obj))
 			return Reflect.callMethod(null, obj, args);
 		return null;
-    }
+	}
 
     public function onPointerNewIndex(obj:Dynamic, key:String, val:Dynamic) {
 		if (key == "__gc")
@@ -370,16 +374,16 @@ class LuaScript extends Script{
 		}
 
 		return null;
-    }
+	}
 
-    public function onGarbageCollection(obj:Dynamic) {
+	public function onGarbageCollection(obj:Dynamic) {
 		trace(obj);
 		if (Reflect.hasField(obj, "__stack_id"))
 		{
 			trace('Clearing item ID: ${obj.__stack_id} from stack due to garbage collection');
 			stack.remove(obj.__stack_id);
 		}
-    }
+	}
 
 	private static var callbackPreventAutoConvert:Bool = false;
 	
@@ -457,6 +461,49 @@ class LuaScript extends Script{
 			});
 			cast v;
 		}
+	}
+
+	public function initHScript() {
+		if(hscript != null) return;
+
+		hscript = new LuaHScript('${haxe.io.Path.withoutExtension(this.path)}_hscript.hx');
+		hscript.setParent(parent.parent);
+	}
+}
+
+final class LuaHScript extends HScript implements IHScriptCustomBehaviour{
+	private var __variables:Array<String>;
+
+	public function new(path:String) {
+		super(path);
+
+		__variables = Type.getInstanceFields(Type.getClass(this));
+	}
+
+	public function execute(code:String):Dynamic {
+		var ret:Dynamic = null;
+		if (code != null && code.trim().length > 0) {
+			this.parser.line = 1;
+			this.loadFromString(code);
+			@:privateAccess
+			this.interp.execute(parser.mk(EBlock([]), 0, 0));
+			if (expr != null)
+				ret = interp.execute(expr);
+		}
+
+		return ret;
+	}
+
+	public function hget(name:String):Dynamic {
+		return __variables.contains(name) ? Reflect.getProperty(this, name) : this.get(name);
+	}
+
+	public function hset(name:String, val:Dynamic):Dynamic {
+		if (__variables.contains(name))
+			Reflect.setProperty(this, name, val);
+		else
+			this.set(name, val);
+		return val;
 	}
 }
 

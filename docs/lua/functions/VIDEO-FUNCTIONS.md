@@ -15,6 +15,8 @@ Creates a video sprite with the specified file path. It calls "onVideoFinished" 
 - x (opt.) = 0: Position on X (horizontal).
 - y (opt.) = 0: Position on Y (vertical).
 
+Returns the video reference.
+
 ### `loadVideo(name, videoPath, ext)`
 
 Loads the video sprite with the given file path.

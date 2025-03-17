@@ -13,6 +13,8 @@ Plays the given sound file. It just plays the sound if an alias is not specified
 - volume (opt.) = 1: How loud to play it (0 to 100).
 - looped (opt.) = false: Whether to loop this sound.
 
+Returns the sound reference.
+
 ## Sound management
 
 ### `stopSound(name, destroy)`

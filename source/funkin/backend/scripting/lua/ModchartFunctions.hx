@@ -47,11 +47,12 @@ final class ModchartFunctions {
 		];
 	}
 
+	private static function onError(fn:String) 
+		LuaTools.printFuncMsg(fn, 'FunkinModchart not initialized', ERROR);
+	
 	public static function getFunkinModchartFunctions(?script:LuaScript):Map<String, Dynamic> {
 		#if MODCHARTING_FEATURES
 		var instance = PlayState.instance;
-
-		var onError:String->Void = (fn) -> LuaTools.printFuncMsg(fn, 'FunkinModchart not initialized', ERROR);
 
 		return [
 			"initFM" => function(?addManager:Bool = true, ?alias:String) {

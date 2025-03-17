@@ -9,23 +9,25 @@ final class SoundFunctions {
 		return [
 			"playSound" => function(name:String, file:String, ?volume:Float = 100, ?looped:Bool = false, ?destroy:Bool = true) {
 				var finalVolume:Float = FlxMath.bound(volume, 0, 100) / 100;
-				if(name.trim().length == 0) {
+				if (name.trim().length == 0) {
 					FlxG.sound.play(Paths.sound(file), finalVolume);
-					return;
+					return null;
 				}
-				
-				if(instance.luaObjects["SOUNDS"].exists(name)) {
-					var sound:FlxSound = instance.luaObjects["SOUNDS"].get(name);
+				var sound:FlxSound = null;
+				if (instance.luaObjects["SOUNDS"].exists(name)) {
+					sound = instance.luaObjects["SOUNDS"].get(name);
 					sound.play(true);
 				}
-				else{
-					instance.luaObjects["SOUNDS"].set(name, FlxG.sound.play(Paths.sound(file), finalVolume, looped, null, destroy, () -> {
-						if(!looped && destroy) {
+				else {
+					sound = FlxG.sound.play(Paths.sound(file), finalVolume, looped, null, destroy, () -> {
+						if (!looped && destroy) {
 							instance.luaObjects["SOUNDS"].remove(name);
 						}
 						script.call("onSoundFinish", [name]);
-					}));
+					});
+					instance.luaObjects["SOUNDS"].set(name, sound);
 				}
+				return sound;
 			},
 			"stopSound" => function(name:String, ?destroy:Bool = true) {
 				if(instance.luaObjects["SOUNDS"].exists(name)) {

@@ -12,6 +12,8 @@ Initializes the specified shader
 - shader: Shader path, don't include the '.frag' or '.vert' extension
 - glslVersion (opt.) = 120: The version that OpenGL will run the shader. Changing this will cause some issues for some graphic cards.
 
+Returns the shader reference.
+
 ### `addShader(object, shader)`
 
 Adds the shader to a camera or sprite.

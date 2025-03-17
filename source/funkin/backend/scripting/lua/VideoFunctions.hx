@@ -10,18 +10,20 @@ class VideoFunctions {
 		return [
 			"createVideo" => function(name:String, ?videoPath:String = null, ?ext:String = "mp4", ?x:Float = 0, ?y:Float = 0) {
 				if(instance.luaObjects["VIDEOS"].exists(name))
-					return;
+					return null;
 
 				var theVideo:FlxVideoSprite = new FlxVideoSprite(x, y);
 				theVideo.bitmap.onEndReached.add(() -> {
 					script.call("onVideoFinished", [name]);
 				});
 				if(videoPath != null && videoPath.length > 0) {
-					if(!theVideo.load(Paths.video(videoPath, ext))) return;
+					if(!theVideo.load(Paths.video(videoPath, ext))) return null;
 				}
 
 				instance.luaObjects["VIDEOS"].set(name, theVideo);
-				cast(script, LuaScript).set(name, theVideo);
+				//cast(script, LuaScript).set(name, theVideo);
+
+				return theVideo;
 			},
 			"loadVideo" => function(name:String, ?videoPath:String = null, ?ext:String = "mp4") {
 				var video:FlxVideoSprite = LuaTools.getObject(instance, name);
