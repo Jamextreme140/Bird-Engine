@@ -211,7 +211,7 @@
 
 	<section if="MODCHARTING_FEATURES">
 		<haxedef name="FM_ENGINE" value="BIRD"/>
-		<haxedef name="FM_ENGINE_VERSION" value="1.5.1"/>
+		<haxedef name="FM_ENGINE_VERSION" value="1.5.3"/>
 
 		<haxeflag name="--macro" value="modchart.core.macros.Macro.includeFiles()"/>
 	</section>
