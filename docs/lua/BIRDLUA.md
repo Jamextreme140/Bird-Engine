@@ -24,8 +24,10 @@ Example usage:
 local hasTween = false
 local posX = 10
 
+local fabi
+
 function postCreate()
-  createSprite('fabi', 'fabi')
+  fabi = createSprite('fabi', 'fabi')
   fabi.setPosition(posX, 200)
   fabi.scrollFactor.x = 0
   fabi.scrollFactor.y = 0
