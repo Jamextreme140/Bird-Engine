@@ -2,7 +2,7 @@ package funkin.backend.scripting.lua.events;
 
 import funkin.backend.scripting.events.CancellableEvent;
 
-class TimerEvent extends CancellableEvent{
+final class TimerEvent extends CancellableEvent{
 	/**
 	 * Name of the timer
 	 */

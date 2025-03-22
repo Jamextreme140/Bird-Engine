@@ -21,6 +21,9 @@ using llua.Convert;
 
 /**
  * Based on code from Codename Engine "lua-test" branch
+ * 
+ * Thank you yosh :333 -jamextreme140
+ * 
  * @see https://github.com/CodenameCrew/CodenameEngine/blob/lua-test/source/funkin/scripting/LuaScript.hx
  */
 class LuaScript extends Script{
@@ -54,7 +57,7 @@ class LuaScript extends Script{
 		funkin.backend.system.framerate.LuaInfo.luaCount += 1;
 	}
 	
-    public override function onCreate(path:String) {
+	public override function onCreate(path:String) {
 		super.onCreate(path);
 
 		state = LuaL.newstate();
@@ -90,21 +93,21 @@ class LuaScript extends Script{
 		#if GLOBAL_SCRIPT
 		funkin.backend.scripting.GlobalScript.call("onScriptCreated", [null, "luascript"]);
 		#end
-    }
+	}
 
-    public override function onLoad() {
-        var code = Assets.getText(path);
+	public override function onLoad() {
+		var code = Assets.getText(path);
 		if(code != null && code.trim() != "") {
 			if (state.dostring(code) != 0)
 				this.error('${state.tostring(-1)}');
 			else
 				this.call('new', []);
 		}
-    }
+	}
 
 	public static var callbackReturnVariables = [];
 
-    public override function onCall(funcName:String, args:Array<Dynamic>):Dynamic {
+	public override function onCall(funcName:String, args:Array<Dynamic>):Dynamic {
 		state.settop(0);
 		state.getglobal(funcName);
 
@@ -123,7 +126,7 @@ class LuaScript extends Script{
 		var v = fromLua(state.gettop());
 		state.settop(0);
 		return v;
-    }
+	}
 
 	public override function set(variable:String, value:Dynamic) {
 		if (state == null)
@@ -188,7 +191,7 @@ class LuaScript extends Script{
 		Logs.trace('Hot-reloading is currently not supported on Lua.', WARNING);
 	}
 
-    public override function setParent(variable:Dynamic) {
+	public override function setParent(variable:Dynamic) {
 		parent.parent = variable;
 		var fields:Array<String> = switch(Type.typeof(variable)) {
 			case TClass(c): Type.getInstanceFields(c);
@@ -250,7 +253,7 @@ class LuaScript extends Script{
 			case Lua.LUA_TTABLE:
 				ret = toHaxeObj(stackPos);
 			case Lua.LUA_TFUNCTION: // From https://github.com/DragShot/linc_luajit/
-				null;
+				null; // This there something wrong with this???
 			// ret = new LuaCallback(state, state.ref(Lua.LUA_REGISTRYINDEX));
 			// case Lua.LUA_TUSERDATA:
 			// 	ret = LuaL.ref(l, Lua.LUA_REGISTRYINDEX);
@@ -340,7 +343,7 @@ class LuaScript extends Script{
 		return v;
 	}
 
-    public function onPointerIndex(obj:Dynamic, key:String) {
+	public function onPointerIndex(obj:Dynamic, key:String) {
 		if (obj != null)
 		{
 			if (obj is IHScriptCustomBehaviour)
@@ -361,7 +364,7 @@ class LuaScript extends Script{
 		return null;
 	}
 
-    public function onPointerNewIndex(obj:Dynamic, key:String, val:Dynamic) {
+	public function onPointerNewIndex(obj:Dynamic, key:String, val:Dynamic) {
 		if (key == "__gc")
 			return null;
 

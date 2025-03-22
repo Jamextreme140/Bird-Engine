@@ -5,7 +5,7 @@ import flixel.FlxCamera;
 
 import funkin.backend.scripting.lua.utils.ILuaScriptable;
 
-class CameraFunctions {
+final class CameraFunctions {
 	public static function getCameraFunctions(instance:ILuaScriptable, ?script:Script):Map<String, Dynamic> {
 		return [
 			"createCamera" => function(name:String, ?x:Int = 0, ?y:Int = 0, ?width:Int = 0, ?height:Int = 0) {

@@ -4,7 +4,7 @@ import modchart.events.Event;
 import funkin.backend.scripting.events.CancellableEvent;
 
 /**
- * NOTE: This event cannot be cancelled
+ * NOTE: This event cannot be cancelled if "cancel" or "preventDefault" is called.
  */
 final class CallbackEvent extends CancellableEvent{
 
@@ -23,6 +23,10 @@ final class CallbackEvent extends CancellableEvent{
 	public var active:Bool = false;
 
 	override function cancel(c:Bool = true) {
+		Logs.trace('CallbackEvent: This event cannot be cancelled', WARNING);
+	}
+
+	override function preventDefault(c:Bool = false) {
 		Logs.trace('CallbackEvent: This event cannot be cancelled', WARNING);
 	}
 }

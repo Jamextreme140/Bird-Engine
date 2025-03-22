@@ -3,7 +3,7 @@ package funkin.backend.scripting.lua;
 import funkin.backend.scripting.lua.utils.ILuaScriptable;
 import funkin.backend.scripting.LuaScript.LuaHScript;
 
-class HScriptFunctions {
+final class HScriptFunctions {
 	public static function getHScriptFunctions(?instance:ILuaScriptable, ?script:LuaScript):Map<String, Dynamic> {
 		return [
 			#if ENABLE_LUA

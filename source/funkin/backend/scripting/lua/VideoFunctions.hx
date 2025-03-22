@@ -5,7 +5,7 @@ import hxvlc.flixel.FlxVideoSprite;
 
 import funkin.backend.scripting.lua.utils.ILuaScriptable;
 
-class VideoFunctions {
+final class VideoFunctions {
 	public static function getVideoFunctions(instance:ILuaScriptable, ?script:Script):Map<String, Dynamic> {
 		return [
 			"createVideo" => function(name:String, ?videoPath:String = null, ?ext:String = "mp4", ?x:Float = 0, ?y:Float = 0) {
