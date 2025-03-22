@@ -8,11 +8,11 @@ Want to use Codename Engine but you want to use Lua (hi psych users :3) or are y
 
 Originally developed for FNF Vs SC. This custom engine includes the following features
 
-- Full Lua Script support **(Not compatible with Psych Lua)**
+- Full Lua Script support with OOP-like programming **(Not compatible with Psych Lua)**
   - Gameplay Scripting
   - Customizable States/Substates (and Custom ones too)
   - NDLL management
-- Modchart system by [TheoDevelops](https://github.com/TheoDevelops/CNEModchart-Framework) (on early stage)
+- Modchart system by [TheoDevelops](https://github.com/TheoDevelops/FunkinModchart) (on early stage)
 
 **NOTE**: Even with the improved Lua flexibility, do not consider it as a Scripting replacement, but as a complement. Remember that the main scripting system of this engine is HScript.
 
@@ -23,6 +23,13 @@ Known issues in the beta:
 Build instructions are below. Press TAB on the main menu to switch mods.
 
 Also, the command `.\bird test` uses the source assets folder instead of the export one for easier development (Although you can still use `lime test windows` normally).
+
+<details>
+  <summary><h2>Credits</h2></summary>
+
+- Credits to [superpowers04](https://github.com/superpowers04) for [linc_luajit](https://github.com/superpowers04/linc_luajit) (Lua support).
+- Credits to [TheoDevelops](https://github.com/TheoDevelops) for the [FunkinModchart](https://github.com/TheoDevelops/FunkinModchart) framework.
+</details>
 
 ## DISCLAIMER - THIS IS A SUB-ENGINE OF [CODENAME ENGINE](https://github.com/CodenameCrew/CodenameEngine)
 
