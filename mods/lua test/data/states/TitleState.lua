@@ -7,12 +7,19 @@ function postCreate()
 				theLogo = spr;
 			}
 		}
-		FlxTween.tween(theLogo, {y: theLogo.y + 50}, (Conductor.bpm / 60)/2, {ease: FlxEase.sineInOut, type: FlxTween.PINGPONG});
+		if(theLogo != null)
+			FlxTween.tween(theLogo, {y: theLogo.y + 50}, (Conductor.bpm / 60)/2, {ease: FlxEase.sineInOut, type: FlxTween.PINGPONG});
 	
 		function sayHi() {
 			trace("Hi!");
 		}
+		
+		function sum(a:Int, b:Int) {
+			return a + b;
+		}
 	]])
 
 	tweenLogo.sayHi()
+	local num = tweenLogo.sum(10, 15)
+	print(num)
 end
