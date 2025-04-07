@@ -1,9 +1,11 @@
 package funkin.backend.scripting.lua;
 
 import funkin.backend.scripting.lua.events.modchart.CallbackEvent;
-import modchart.Manager;
 import flixel.tweens.*;
 import flixel.tweens.FlxTween.FlxTweenType;
+#if MODCHARTING_FEATURES
+import modchart.Manager;
+#end
 
 final class ModchartFunctions {
 	public static function getModchartFunctions(?script:Script):Map<String, Dynamic> {

@@ -1,5 +1,5 @@
-package modchart.standalone.adapters.bird;
-
+package modchart.backend.standalone.adapters.bird;
+#if MODCHARTING_FEATURES
 import flixel.FlxCamera;
 import flixel.FlxSprite;
 import funkin.backend.system.Conductor;
@@ -7,12 +7,16 @@ import funkin.game.Note;
 import funkin.game.PlayState;
 import funkin.game.Strum;
 import funkin.options.Options;
-import modchart.standalone.IAdapter;
+import modchart.backend.standalone.IAdapter;
 /**
- * from Codename.hx
+ * (Codename)Bird Adapter for codename version before FunkinModchart being added
+ * This doesn't contain:
+ * Splashes
+ * Hold parent time (used to rotate the hold around the parent note, for long/short holds, etc), (should i add it using a work around??)
+ * Hold subdivision option
  * @see https://github.com/TheoDevelops/FunkinModchart/blob/dev/modchart/standalone/adapters/codename/Codename.hx
  */
-class Bird implements IAdapter {
+ class Codename implements IAdapter {
 	private var __fCrochet:Float = 0;
 
 	public function new() {}
@@ -175,3 +179,4 @@ class Bird implements IAdapter {
 		return pspr;
 	}
 }
+#end

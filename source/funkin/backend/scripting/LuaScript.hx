@@ -1,5 +1,6 @@
 package funkin.backend.scripting;
 
+import flixel.util.typeLimit.OneOfTwo;
 #if ENABLE_LUA
 import funkin.backend.scripting.lua.utils.ILuaScriptable;
 import funkin.backend.scripting.events.CancellableEvent;
@@ -13,11 +14,11 @@ import hscript.IHScriptCustomBehaviour;
 
 import llua.State;
 import llua.Macro.*;
-import llua.LuaCallback;
 
 using llua.Lua;
 using llua.LuaL;
 using llua.Convert;
+using Lambda;
 
 /**
  * Based on code from Codename Engine "lua-test" branch
@@ -52,6 +53,8 @@ class LuaScript extends Script{
 		
 		if(parent.instance != null) {
 			setCallbacks(); // Sets all the callbacks
+
+			set('this', parent.instance);
 		}
 		
 		funkin.backend.system.framerate.LuaInfo.luaCount += 1;
@@ -132,7 +135,10 @@ class LuaScript extends Script{
 		if (state == null)
 			return;
 
-		pushArg(value);
+		if(value is Class) 
+			setClassPointer(value);
+		else
+			pushArg(value);
 		state.setglobal(variable);
 	}
 
@@ -205,7 +211,9 @@ class LuaScript extends Script{
 		};
 		parent.parentFields = fields;
 		for(field in fields) {
-			this.set(field, Reflect.field(variable, field));
+			var f:Dynamic = Reflect.field(variable, field);
+			if(!Reflect.isFunction(f))
+				set(field, f);
 		}
 	}
 
@@ -309,7 +317,15 @@ class LuaScript extends Script{
 		}
 	}
 
-	private inline function setStackPointer(val:Dynamic) {
+	private function setStackPointer(val:Dynamic) {
+		assignPointer(val);
+	}
+
+	private function setClassPointer(val:Class<Dynamic>) {
+		assignPointer(new LuaClass(val));
+	}
+
+	private function assignPointer(val:OneOfTwo<LuaClass, Dynamic>) {
 		var p:StackPointer = {
 			__stack_id: lastStackID++,
 		};
@@ -321,7 +337,7 @@ class LuaScript extends Script{
 		state.pushcfunction(cpp.Callable.fromStaticFunction(__gc));
 		state.settable(-3);
 
-		stack[p.__stack_id] = val;
+		stack[p.__stack_id] = cast val;
 	}
 
 	public static function __index(state:StatePointer):Int {
@@ -344,6 +360,7 @@ class LuaScript extends Script{
 	}
 
 	public function onPointerIndex(obj:Dynamic, key:String) {
+		//trace("reference");
 		if (obj != null)
 		{
 			if (obj is IHScriptCustomBehaviour)
@@ -358,6 +375,7 @@ class LuaScript extends Script{
 	public var onPointerCall:Dynamic;
 
 	private function pointerCall(args:Array<Dynamic>) {
+		//trace("calling");
 		var obj = args.shift(); // Retrieves the referenced object
 		if (obj != null && Reflect.isFunction(obj))
 			return Reflect.callMethod(null, obj, args);
@@ -507,6 +525,35 @@ final class LuaHScript extends HScript implements IHScriptCustomBehaviour{
 		else
 			this.set(name, val);
 		return val;
+	}
+}
+
+// TODO: make enums too
+final class LuaClass implements IHScriptCustomBehaviour {
+	public var __class(default, null):Class<Dynamic>;
+
+	var __constructor(default, null):haxe.Constraints.Function;
+	var __fields(default, null):Array<String>;
+
+	public function new(__class:Class<Dynamic>) {
+		this.__class = __class;
+		__fields = Type.getClassFields(__class);
+		__constructor = Reflect.makeVarArgs((args) -> Type.createInstance(__class, args));
+	}
+
+	public function hget(name:String):Dynamic {
+		if(name == 'new')
+			return __constructor;
+		
+		return __fields.contains(name) ? Reflect.getProperty(__class, name) : null;
+	}
+
+	public function hset(name:String, val:Dynamic):Dynamic {
+		if(__fields.contains(name)) {
+			Reflect.setProperty(__class, name, val);
+			return val;
+		}
+		return null;
 	}
 }
 

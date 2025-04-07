@@ -22,4 +22,5 @@ function postCreate()
 	tweenLogo.sayHi()
 	local num = tweenLogo.sum(10, 15)
 	print(num)
+	print(FlxSprite.defaultAntialiasing)
 end

@@ -7,6 +7,8 @@ local bpm
 local fabi
 local chrom
 
+local sprTween
+
 function new()
 	print('"new" constructor :3')
 end
@@ -43,6 +45,18 @@ function postCreate()
 		trace("Hello from Lua through HScript ");
 		trace(">:3");
 	]]);
+
+	local newSpr = FlxSprite.new(FlxG.width - 210, 5)
+	newSpr.makeGraphic(200, 200, FlxColor.BLACK)
+	newSpr.scrollFactor.x = 0
+	newSpr.scrollFactor.y = 0
+	add(newSpr)
+
+	sprTween = FlxTween.tween(newSpr, {x = newSpr.x - 80}, (60/bpm), {
+		ease = FlxEase.circInOut,
+		startDelay = (60/bpm),
+		type = FlxTween.PINGPONG}
+	)
 end
 
 function beatHit(curBeat)
@@ -77,6 +91,7 @@ end
 function onTimer(event)
 	if event.name == 'cancelFabiTween' then
 		cancelTween('fabitween')
+		sprTween.cancel()
 		print('canceled! from '..event.name..' timer')
 	end
 end

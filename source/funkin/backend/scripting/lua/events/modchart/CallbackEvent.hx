@@ -1,6 +1,6 @@
 package funkin.backend.scripting.lua.events.modchart;
-
-import modchart.events.Event;
+#if MODCHARTING_FEATURES
+import modchart.engine.events.Event;
 import funkin.backend.scripting.events.CancellableEvent;
 
 /**
@@ -30,3 +30,4 @@ final class CallbackEvent extends CancellableEvent{
 		Logs.trace('CallbackEvent: This event cannot be cancelled', WARNING);
 	}
 }
+#end

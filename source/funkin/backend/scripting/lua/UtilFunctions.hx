@@ -8,11 +8,22 @@ final class UtilFunctions {
 	public static function getUtilFunctions(instance:ILuaScriptable, ?script:Script):Map<String, Dynamic> {
 		return [
 			"callInstanceFunction" => function(func:String, ?args:Array<Dynamic>) {
-				instance.call(func, args);
-				return;
+				return instance.call(func, args);
 			},
 			"lerp" => function(v1:Float, v2:Float, ratio:Float, ?fps:Bool = false) {
 				return instance.lerp(v1, v2, ratio, fps);
+			},
+			"add" => function(obj:FlxBasic) {
+				return instance.add(obj);
+			},
+			"insert" => function(pos:Int, obj:FlxBasic) {
+				return instance.insert(pos, obj);
+			},
+			"remove" => function(obj:FlxBasic, splice:Bool = false) {
+				return instance.remove(obj, splice);
+			},
+			"openSubState" => function(subState:flixel.FlxSubState) {
+				instance.openSubState(subState);
 			},
 			"setTimer" => function(name:String, ?delay:Float = 1, ?times:Int = 1) {
 				var timer = new FlxTimer();
