@@ -49,8 +49,8 @@ class LuaScript extends Script {
 		if (cbf == null || !Reflect.isFunction(cbf)) 
 			return 0;
 
-		var nparams:Int = Lua.gettop(l);
-		var args:Array<Dynamic> = [
+		final nparams:Int = Lua.gettop(l);
+		final args:Array<Dynamic> = [
 			for (i in 0...nparams)
 				callbackPreventAutoConvert ? l.fromLua(-nparams + i) : curLua.fromLua(-nparams + i)
 		];
@@ -108,22 +108,36 @@ class LuaScript extends Script {
 
 	public var scriptObject(default, set):Dynamic;
 	var __instanceFields:Array<String> = [];
-	function set_scriptObject(v:Dynamic) {
+	function set_scriptObject(v:Dynamic):Dynamic {
+		var fieldMap:Map<String, String> = [];
 		switch(Type.typeof(v)) {
 			case TClass(c):
-				__instanceFields = Reflect.fields(v);
-				__instanceFields = __instanceFields.concat(Type.getInstanceFields(c));
+				for(field in Reflect.fields(v).concat(Type.getInstanceFields(c))) 
+					fieldMap[field] = field;
+				
+				__instanceFields = fieldMap.array();
 			case TObject:
 				var cls = Type.getClass(v);
 				switch(Type.typeof(cls)) {
 					case TClass(c):
-						__instanceFields = Reflect.fields(v);
-						__instanceFields = Type.getInstanceFields(c);
+						for(field in Reflect.fields(v).concat(Type.getInstanceFields(c))) 
+							fieldMap[field] = field;
+						
+						__instanceFields = fieldMap.array();
 					default:
 						__instanceFields = Reflect.fields(v);
 				}
 			default:
 		}
+
+		if(v != null && __instanceFields.length > 0) {
+			for(field in __instanceFields) {
+				var f:Dynamic = Reflect.field(v, field);
+				if(!Reflect.isFunction(f))
+					set(field, f);
+			}
+		}
+
 		return scriptObject = v;
 	}
 
@@ -201,6 +215,15 @@ class LuaScript extends Script {
         return v;
 	}
 
+	override function get(variable:String):Dynamic {
+		if (state == null)
+			return super.get(variable);
+		state.getglobal(variable);
+		var r = fromLua(-1);
+		state.pop(1);
+		return r;
+	}
+
 	override function set(variable:String, value:Dynamic) {
 		if (state == null)
 			return;
@@ -221,7 +244,9 @@ class LuaScript extends Script {
 	}
 
 	public override function setPublicMap(map:Map<String, Dynamic>) {
-		Logs.trace('setting public variables is currently not supported on Lua.', WARNING);
+		for(k => v in map)
+			if(!Reflect.isFunction(v))
+				set(k, v);
 	}
 
 	override function reload() {
@@ -233,6 +258,7 @@ class LuaScript extends Script {
 		super.destroy();
 	}
 
+	// checks for a local callback and then it look-up for a parent function
 	public function resolveCallback(id:String):haxe.Constraints.Function {
 		if (id == null)
 			return null;
@@ -254,6 +280,11 @@ class LuaScript extends Script {
 	public function addCallback(funcName:String, func:Dynamic) {
 		callbacks.set(funcName, func);
 		state.add_callback_function(funcName);
+	}
+
+	public function removeCallback(funcName:String) {
+		if(callbacks.remove(funcName))
+			state.remove_callback_function(funcName);
 	}
 
 	public function fromLua(stackPos:Int):Dynamic {
@@ -402,44 +433,36 @@ class LuaScript extends Script {
 	}
 
 	public function toHaxeObj(i:Int):Any {
-		var count = 0;
+		var hasItems = false;
 		var array = true;
 
-		loopTable(state, i, {
-			if (array) {
-				if (Lua.type(state, -2) != Lua.LUA_TNUMBER)
-					array = false;
-				else {
-					var index = Lua.tonumber(state, -2);
-					if (index < 0 || Std.int(index) != index)
-						array = false;
-				}
+		loopTable(state, i,{
+			hasItems = true;
+			if(Lua.type(state, -2) != Lua.LUA_TNUMBER){
+				array = false; 
 			}
-			count++;
+			final index = Lua.tonumber(state, -2);
+			if(index < 0 || Std.int(index) != index) {
+				array = false; 
+			}
 		});
+		if(!hasItems) return {}
 
-		return if (count == 0) {
-			{};
-		}
-		else if (array) {
-			var v = [];
+		if(array) {
+			final v:Array<Dynamic> = [];
 			loopTable(state, i, {
-				var index = Std.int(Lua.tonumber(state, -2)) - 1;
-				v[index] = fromLua(-1);
+				v[Std.int(Lua.tonumber(state, -2)) - 1] = fromLua(-1);
 			});
-			cast v;
+			return cast v;
 		}
-		else {
-			var v:DynamicAccess<Any> = {};
-			loopTable(state, i, {
-				switch Lua.type(state, -2)
-				{
-					case t if (t == Lua.LUA_TSTRING): v.set(Lua.tostring(state, -2), fromLua(-1));
-					case t if (t == Lua.LUA_TNUMBER): v.set(Std.string(Lua.tonumber(state, -2)), fromLua(-1));
-				}
-			});
-			cast v;
-		}
+		final v:DynamicAccess<Any> = {};
+		loopTable(state, i, {
+			switch Lua.type(state, -2) {
+				case t if(t == Lua.LUA_TSTRING): v.set(Lua.tostring(state, -2), fromLua(-1));
+				case t if(t == Lua.LUA_TNUMBER):v.set(Std.string(Lua.tonumber(state, -2)), fromLua(-1));
+			}
+		});
+		return v;
 	}
 
 	public function close() {

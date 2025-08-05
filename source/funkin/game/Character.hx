@@ -1,10 +1,6 @@
 package funkin.game;
 
-import sys.FileSystem;
-import flixel.util.FlxSpriteUtil;
-import openfl.display.Graphics;
 import flixel.util.typeLimit.OneOfTwo;
-import flixel.graphics.frames.FlxFrame;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.util.FlxColor;
@@ -14,6 +10,7 @@ import funkin.backend.scripting.Script;
 import funkin.backend.scripting.ScriptPack;
 import funkin.backend.scripting.events.CancellableEvent;
 import funkin.backend.scripting.events.character.*;
+import funkin.backend.scripting.events.sprite.PlayAnimContext;
 import funkin.backend.scripting.events.sprite.*;
 import funkin.backend.scripting.events.PointEvent;
 import funkin.backend.scripting.events.DrawEvent;
@@ -25,7 +22,6 @@ import funkin.backend.utils.XMLUtil;
 import haxe.Exception;
 import haxe.io.Path;
 import haxe.xml.Access;
-import openfl.geom.ColorTransform;
 
 using StringTools;
 
