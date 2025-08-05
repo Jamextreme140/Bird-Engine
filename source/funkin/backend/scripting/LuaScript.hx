@@ -283,6 +283,7 @@ class LuaScript extends Script {
 	}
 
 	public override function setPublicMap(map:Map<String, Dynamic>) {
+		if(map.empty()) return;
 		for(k => v in map)
 			if(!Reflect.isFunction(v))
 				set(k, v);
