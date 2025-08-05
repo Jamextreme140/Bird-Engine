@@ -178,6 +178,42 @@ class LuaScript extends Script {
 
 	function setDefaultCallbacks() {
 		addCallback("translate", funkin.backend.utils.TranslationUtil.get);
+		addCallback("import", function(n:String, ?as:String) {
+			var splitName:Array<String> = [for(e in n.split(".")) e.trim()];
+			var realName:String = splitName.join(".");
+			var clsName:String = splitName[splitName.length - 1];
+			var toSet = as != null ? as : clsName;
+			var oldName = realName;
+			var oldSplitName = splitName.copy();
+
+			// TODO: variable exists check
+
+			var cl = Type.resolveClass(realName);
+			if (cl == null)
+				cl = Type.resolveClass('${realName}_HSC'); //It's an Abstract
+
+			// TODO: Enums 
+
+			if (cl == null) {
+				if(splitName.length > 1) {
+					splitName.splice(-2, 1); // Remove the last last item
+					realName = splitName.join(".");
+
+					cl = Type.resolveClass(realName);
+					if (cl == null)
+						cl = Type.resolveClass('${realName}_HSC');
+				}
+			}
+
+			if (cl == null) {
+				error('Unknown Class $oldName');
+				return null;
+			}
+
+			set(toSet, cl);
+
+			return null;
+		});
 	}
 
 	override function onLoad() {
@@ -216,12 +252,15 @@ class LuaScript extends Script {
 	}
 
 	override function get(variable:String):Dynamic {
+		/*
 		if (state == null)
 			return super.get(variable);
 		state.getglobal(variable);
 		var r = fromLua(-1);
 		state.pop(1);
 		return r;
+		*/
+		return null;
 	}
 
 	override function set(variable:String, value:Dynamic) {
