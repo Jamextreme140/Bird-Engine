@@ -1,0 +1,15 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Don't count pages documentation as actual code
+pages/** linguist-vendored
+
+# Include HScript files as Haxe
+*.hxs linguist-language=Haxe
+*.hsc linguist-language=Haxe
+*.hscript linguist-language=Haxe
+
+# Include Shader files as GLSL
+*.frag linguist-language=GLSL
+*.vert linguist-language=GLSL
+*.glsl linguist-language=GLSL

@@ -1,0 +1,15 @@
+export/
+dump/
+latest/*
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+.haxelib/
+pages/
+docs/doc.xml
+mods/*
+addons/*
+!mods/readme.txt
+addons/*
+!addons/readme.txt
+dev-libs/
