@@ -2,7 +2,7 @@
 <project>
 	<!-- _________________________ Application Settings _________________________ -->
 	<app
-		title="Friday Night Funkin' - Codename Engine" main="funkin.backend.system.Main"
+		title="Friday Night Funkin' - Bird Engine" main="funkin.backend.system.Main"
 		file="CodenameEngine" packageName="com.yoshman29.codenameengine"
 		package="com.yoshman29.codenameengine"
 		version="1.0.0" company="Yoshman29" />
@@ -101,6 +101,9 @@
 	<!-- Comment this out to disable support for Nape integration (flixel.addons.nape) (reduces compile times) !-->
 	<define name="NAPE_ENABLED" unless="STRIPPED_COMPILE" />
 
+	<!-- Comment this out to disable the use of luajit. !-->
+	<define name="ENABLE_LUA" if="cpp"/>
+
 	<!-- Comment this out to disable video cutscene support, in case of compilation errors. !-->
 	<section if="cpp">
 		<define name="VIDEO_CUTSCENES" if="desktop || android" />
@@ -137,6 +140,8 @@
 	<haxelib name="hxdiscord_rpc" if="DISCORD_RPC"/>
 	<haxelib name="markdown" />
 	<haxelib name="hxcpp-debug-server" if="TEST_BUILD debug" />
+
+	<haxelib name="linc_luajit" if="ENABLE_LUA" />
 
 	<!-- _____________________________ Path Settings ____________________________ -->
 

@@ -1,4 +1,15 @@
-# Friday Night Funkin' - Codename Engine (WIP)
+# Friday Night Funkin' - Bird Engine
+
+![Bird Engine Banner](art/bde_banner.png)
+
+Want to use Codename Engine but you want to use Lua (hi psych users :3) or are you still learning Haxe (for HScript)? This is the perfect fork to start with.
+
+Based on Codename Engine, this custom engine includes:
+
+- Full Lua Script support over OOP-like programming **(i.e. Not compatible with Psych Lua)**
+  - Gameplay Scripting
+  - Customizable States/Substates (and Custom ones too)
+  - NDLL management
 
 ## PLEASE NOTE - THIS IS STILL IN A BETA STATE
 ### Mods created with beta versions of Codename may not be compatible with the release version
@@ -7,7 +18,13 @@ Known issues in the beta:
 
 Build instructions are below. Press TAB on the main menu to switch mods.
 
-Also, the command `.\cne test` uses the source assets folder instead of the export one for easier development (Although you can still use `lime test windows` normally).
+Also, the command `.\bird test` uses the source assets folder instead of the export one for easier development (Although you can still use `lime test windows` normally).
+
+<details>
+  <summary><h2>Credits</h2></summary>
+
+- Credits to [superpowers04](https://github.com/superpowers04) for [linc_luajit](https://github.com/superpowers04/linc_luajit) (Lua support).
+</details>
 
 ## Codename Engine
 
