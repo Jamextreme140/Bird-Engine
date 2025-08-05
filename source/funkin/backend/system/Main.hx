@@ -132,6 +132,10 @@ class Main extends Sprite
 		Logs.init();
 		Paths.init();
 
+		#if ENABLE_LUA
+		funkin.backend.scripting.LuaScript.init();
+		#end
+
 		hscript.Interp.importRedirects = funkin.backend.scripting.Script.getDefaultImportRedirects();
 
 		#if GLOBAL_SCRIPT

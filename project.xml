@@ -141,7 +141,7 @@
 	<haxelib name="markdown" />
 	<haxelib name="hxcpp-debug-server" if="TEST_BUILD debug" />
 
-	<haxelib name="linc_luajit" if="ENABLE_LUA" />
+	<haxelib name="linc_luajit-improved" if="ENABLE_LUA" />
 
 	<!-- _____________________________ Path Settings ____________________________ -->
 

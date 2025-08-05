@@ -1,0 +1,499 @@
+package funkin.backend.scripting;
+
+#if ENABLE_LUA
+
+import cpp.Callable;
+import cpp.Pointer;
+
+import flixel.util.typeLimit.OneOfTwo;
+
+import haxe.ds.IntMap;
+import haxe.ds.StringMap;
+import haxe.DynamicAccess;
+
+import llua.Lua;
+import llua.LuaL;
+import llua.State;
+import llua.Convert;
+import llua.Macro.*;
+
+using llua.Lua;
+using llua.LuaL;
+using llua.Convert;
+using Lambda;
+
+/**
+ * Based on code from Codename Engine "lua-test" branch
+ * 
+ * Thank you yosh :333 -jamextreme140
+ * 
+ * @see https://github.com/CodenameCrew/CodenameEngine/blob/lua-test/source/funkin/scripting/LuaScript.hx
+ */
+class LuaScript extends Script {
+
+	public static function init() {
+		Lua.set_callbacks_function(Callable.fromStaticFunction(callbackHandler));
+		Lua.register_hxtrace_func(Callable.fromStaticFunction(printFunction));
+	}
+
+	static var callbackPreventAutoConvert:Bool = false;
+	static var callbackReturnVariables = [];
+	static function callbackHandler(l:State, fname:String):Int {
+		if (!(Script.curScript is LuaScript))
+			return 0;
+		var curLua:LuaScript = cast Script.curScript;
+
+		var cbf = curLua.resolveCallback(fname);
+		callbackReturnVariables = [];
+
+		if (cbf == null || !Reflect.isFunction(cbf)) 
+			return 0;
+
+		var nparams:Int = Lua.gettop(l);
+		var args:Array<Dynamic> = [
+			for (i in 0...nparams)
+				callbackPreventAutoConvert ? l.fromLua(-nparams + i) : curLua.fromLua(-nparams + i)
+		];
+
+		var ret:Dynamic = null;
+
+		try {
+			ret = (nparams > 0) ? Reflect.callMethod(null, cbf, args) : cbf();
+		}
+		catch (e) {
+			curLua.error(e.details()); // for super cool mega logging!!!
+			throw e;
+		}
+		Lua.settop(l, 0);
+
+		if (callbackReturnVariables.length <= 0)
+			callbackReturnVariables.push(ret);
+		for (e in callbackReturnVariables)
+			curLua.pushArg(e);
+
+		/* return the number of results */
+		return callbackReturnVariables.length;
+	}
+
+	static function printFunction(s:String):Int {
+		if (Script.curScript != null)
+			Script.curScript.trace(s);
+		return 0;
+	}
+
+	static function __index(state:StatePointer):Int {
+		return callbackHandler(cast Pointer.fromRaw(state).ref, "__onPointerIndex");
+	}
+
+	static function __newindex(state:StatePointer):Int {
+		return callbackHandler(cast Pointer.fromRaw(state).ref, "__onPointerNewIndex");
+	}
+
+	static function __call(state:StatePointer):Int {
+		return callbackHandler(cast Pointer.fromRaw(state).ref, "__onPointerCall");
+	}
+
+	static function __gc(state:StatePointer):Int {
+		// callbackPreventAutoConvert = true;
+		var v = callbackHandler(cast Pointer.fromRaw(state).ref, "__gc");
+		// callbackPreventAutoConvert = false;
+		return v;
+	}
+
+	public var state(default, null):State;
+	public var callbacks:StringMap<Dynamic> = new StringMap();
+
+	var lastStackID:Int = 0;
+	var stack:IntMap<Dynamic> = new IntMap();
+
+	public var scriptObject(default, set):Dynamic;
+	var __instanceFields:Array<String> = [];
+	function set_scriptObject(v:Dynamic) {
+		switch(Type.typeof(v)) {
+			case TClass(c):
+				__instanceFields = Reflect.fields(v);
+				__instanceFields = __instanceFields.concat(Type.getInstanceFields(c));
+			case TObject:
+				var cls = Type.getClass(v);
+				switch(Type.typeof(cls)) {
+					case TClass(c):
+						__instanceFields = Reflect.fields(v);
+						__instanceFields = Type.getInstanceFields(c);
+					default:
+						__instanceFields = Reflect.fields(v);
+				}
+			default:
+		}
+		return scriptObject = v;
+	}
+
+	override function onCreate(path:String) {
+		super.onCreate(path);
+
+		state = LuaL.newstate();
+		state.openlibs();
+		state.register_hxtrace_lib();
+
+		onPointerCall = Reflect.makeVarArgs(pointerCall);
+
+		callbacks.set("__onPointerIndex", onPointerIndex);
+		callbacks.set("__onPointerNewIndex", onPointerNewIndex);
+		callbacks.set("__onPointerCall", onPointerCall);
+		callbacks.set("__gc", onGarbageCollection);
+
+		state.newmetatable("__funkinMetaTable");
+
+		state.pushstring('__index');
+		state.pushcfunction(Callable.fromStaticFunction(__index));
+		state.settable(-3);
+
+		state.pushstring('__newindex');
+		state.pushcfunction(Callable.fromStaticFunction(__newindex));
+		state.settable(-3);
+
+		state.pushstring('__call');
+		state.pushcfunction(Callable.fromStaticFunction(__call));
+		state.settable(-3);
+
+		state.setglobal("__funkinMetaTable");
+
+		#if GLOBAL_SCRIPT
+		funkin.backend.scripting.GlobalScript.call("onScriptCreated", [this, "lua"]);
+		#end
+	}
+
+	function setDefaultCallbacks() {
+		addCallback("translate", funkin.backend.utils.TranslationUtil.get);
+	}
+
+	override function onLoad() {
+		var code = Assets.getText(path);
+		if(code != null && code.trim() != "") {
+			if (state.dostring(code) != 0) {
+				this.error('${state.tostring(-1)}');
+				return;
+			}
+			else
+				this.call('new', []);
+		}
+
+		#if GLOBAL_SCRIPT
+		funkin.backend.scripting.GlobalScript.call("onScriptSetup", [this, "lua"]);
+		#end
+	}
+
+	override function onCall(func:String, args:Array<Dynamic>):Dynamic {
+		state.settop(0);
+		state.getglobal(func);
+
+		if (state.type(-1) != Lua.LUA_TFUNCTION)
+			return null;
+
+		for (k => val in args)
+			pushArg(val);
+
+		if (state.pcall(args.length, 1, 0) != 0) {
+			this.error('${state.tostring(-1)}');
+			return null;
+		}
+		var v = fromLua(state.gettop());
+        state.settop(0);
+        return v;
+	}
+
+	override function set(variable:String, value:Dynamic) {
+		if (state == null)
+			return;
+
+		if(value is Class) 
+			setClassPointer(value);
+		/*
+		else if(value is Enum)
+			setEnumPointer(value);
+		*/
+		else
+			pushArg(value);
+		state.setglobal(variable);
+	}
+
+	override function setParent(parent:Dynamic) {
+		this.scriptObject = parent;
+	}
+
+	public override function setPublicMap(map:Map<String, Dynamic>) {
+		Logs.trace('setting public variables is currently not supported on Lua.', WARNING);
+	}
+
+	override function reload() {
+		Logs.trace('Hot-reloading is currently not supported on Lua.', WARNING);
+	}
+
+	override function destroy() {
+		close();
+		super.destroy();
+	}
+
+	public function resolveCallback(id:String):haxe.Constraints.Function {
+		if (id == null)
+			return null;
+		id = StringTools.trim(id);
+
+		if(callbacks.exists(id))
+			return callbacks.get(id);
+
+		if(scriptObject != null) {
+			var instanceHasField:Bool = __instanceFields.contains(id);
+
+			if(instanceHasField)
+				return Reflect.getProperty(scriptObject, id);
+		}
+
+		return null;
+	}
+
+	public function addCallback(funcName:String, func:Dynamic) {
+		callbacks.set(funcName, func);
+		state.add_callback_function(funcName);
+	}
+
+	public function fromLua(stackPos:Int):Dynamic {
+		var ret:Any = null;
+
+		switch (state.type(stackPos))
+		{
+			case Lua.LUA_TNIL:
+				ret = null;
+			case Lua.LUA_TBOOLEAN:
+				ret = state.toboolean(stackPos);
+			case Lua.LUA_TNUMBER:
+				ret = state.tonumber(stackPos);
+			case Lua.LUA_TSTRING:
+				ret = state.tostring(stackPos);
+			case Lua.LUA_TTABLE:
+				ret = toHaxeObj(stackPos);
+			case Lua.LUA_TFUNCTION:
+				null; // no support for functions yet
+			// case Lua.LUA_TUSERDATA:
+			// 	ret = LuaL.ref(l, Lua.LUA_REGISTRYINDEX);
+			// 	trace("userdata\n");
+			// case Lua.LUA_TLIGHTUSERDATA:
+			// 	ret = LuaL.ref(l, Lua.LUA_REGISTRYINDEX);
+			// 	trace("lightuserdata\n");
+			// case Lua.LUA_TTHREAD:
+			// 	ret = null;
+			// 	trace("thread\n");
+			case idk:
+				ret = null;
+				trace("return value not supported\n" + Std.string(idk) + " - " + stackPos);
+		}
+
+		// Stack Pointer
+		if (ret is Dynamic && Reflect.hasField(ret, "__stack_id")) {
+			var pos:Int = Reflect.field(ret, "__stack_id");
+			return stack.get(pos);
+		}
+		return ret;
+	}
+
+	public function pushArg(val:Dynamic) {
+		switch (Type.typeof(val))
+		{
+			case Type.ValueType.TNull:
+				state.pushnil();
+			case Type.ValueType.TBool:
+				state.pushboolean(val);
+			case Type.ValueType.TInt:
+				state.pushinteger(cast(val, Int));
+			case Type.ValueType.TFloat:
+				state.pushnumber(val);
+			case Type.ValueType.TClass(String):
+				state.pushstring(cast(val, String));
+			case Type.ValueType.TClass(Array):
+				var arr:Array<Any> = cast val;
+				var size:Int = arr.length;
+				state.createtable(size, 0);
+
+				for (i in 0...size)
+				{
+					state.pushnumber(i + 1);
+					pushArg(arr[i]);
+					state.settable(-3);
+				}
+			case Type.ValueType.TObject:
+				@:privateAccess
+				state.anonToLua(val); // {}
+			default:
+				setStackPointer(val);
+		}
+	}
+
+	private function setStackPointer(val:Dynamic) {
+		assignPointer(val);
+	}
+
+	private function setClassPointer(val:Class<Dynamic>) {
+		assignPointer(new LuaClass(val));
+	}
+
+	private function setEnumPointer(val:Enum<Dynamic>) {
+		//assignPointer(new LuaClass(val));
+	}
+
+	private function assignPointer(val:OneOfTwo<LuaClass, Dynamic>) {
+		var p:StackPointer = {
+			__stack_id: lastStackID++,
+		};
+		state.toLua(p);
+		state.getmetatable("__funkinMetaTable");
+		state.setmetatable(-2);
+
+		state.pushstring('__gc');
+		state.pushcfunction(Callable.fromStaticFunction(__gc));
+		state.settable(-3);
+
+		stack.set(p.__stack_id, cast val);
+	}
+
+	public function onPointerIndex(obj:Dynamic, key:String) {
+		if (obj != null) {
+			if (obj is LuaAccess)
+				return cast(obj, LuaAccess).get(key);
+			else if (obj is hscript.IHScriptCustomBehaviour)
+				return cast(obj, hscript.IHScriptCustomBehaviour).hget(key);
+			else
+				return Reflect.getProperty(obj, key);
+		}
+
+		return null;
+	}
+
+	public function onPointerNewIndex(obj:Dynamic, key:String, val:Dynamic) {
+		if (key == "__gc")
+			return null;
+
+		if (obj != null) {
+			if (obj is LuaAccess)
+				return cast(obj, LuaAccess).set(key, val);
+			else if (obj is hscript.IHScriptCustomBehaviour)
+				cast(obj, hscript.IHScriptCustomBehaviour).hset(key, val);
+			else
+				Reflect.setProperty(obj, key, val);
+		}
+
+		return null;
+	}
+
+	public dynamic function onPointerCall(args:Array<Dynamic>):Dynamic
+		return null;
+
+	private function pointerCall(args:Array<Dynamic>) {
+		//trace("calling");
+		var obj = args.shift(); // Retrieves the referenced object
+		if (obj != null && Reflect.isFunction(obj))
+			return Reflect.callMethod(null, obj, args);
+		return null;
+	}
+
+	public function onGarbageCollection(obj:Dynamic) {
+		if (Reflect.hasField(obj, "__stack_id")) {
+			trace('Clearing item ID: ${obj.__stack_id} from stack due to garbage collection');
+			stack.remove(obj.__stack_id);
+		}
+	}
+
+	public function toHaxeObj(i:Int):Any {
+		var count = 0;
+		var array = true;
+
+		loopTable(state, i, {
+			if (array) {
+				if (Lua.type(state, -2) != Lua.LUA_TNUMBER)
+					array = false;
+				else {
+					var index = Lua.tonumber(state, -2);
+					if (index < 0 || Std.int(index) != index)
+						array = false;
+				}
+			}
+			count++;
+		});
+
+		return if (count == 0) {
+			{};
+		}
+		else if (array) {
+			var v = [];
+			loopTable(state, i, {
+				var index = Std.int(Lua.tonumber(state, -2)) - 1;
+				v[index] = fromLua(-1);
+			});
+			cast v;
+		}
+		else {
+			var v:DynamicAccess<Any> = {};
+			loopTable(state, i, {
+				switch Lua.type(state, -2)
+				{
+					case t if (t == Lua.LUA_TSTRING): v.set(Lua.tostring(state, -2), fromLua(-1));
+					case t if (t == Lua.LUA_TNUMBER): v.set(Std.string(Lua.tonumber(state, -2)), fromLua(-1));
+				}
+			});
+			cast v;
+		}
+	}
+
+	public function close() {
+		if (state == null)
+			return;
+		this.active = false;
+		state.close();
+		state = null;
+	}
+}
+
+// same thing as IHScriptCustomBehaviour
+interface LuaAccess {
+	public function get(name:String):Dynamic;
+	public function set(name:String, value:Dynamic):Dynamic;
+}
+
+final class LuaClass implements LuaAccess {
+	public var __class(default, null):Class<Dynamic>;
+
+	var __constructor(default, null):haxe.Constraints.Function;
+	var __fields(default, null):Array<String>;
+
+	public function new(__class:Class<Dynamic>) {
+		this.__class = __class;
+		__fields = {
+			var f = Reflect.fields(__class);
+			var cf = Type.getClassFields(__class);
+			var fieldMap:Map<String, String> = [for(field in f.concat(cf)) field => field];
+
+			fieldMap.array();
+		};
+		__constructor = Reflect.makeVarArgs((args) -> Type.createInstance(__class, args));
+	}
+
+	public function get(name:String):Dynamic {
+		if(name == 'new')
+			return __constructor;
+		
+		return __fields.contains(name) ? Reflect.getProperty(__class, name) : null;
+	}
+
+	public function set(name:String, value:Dynamic):Dynamic {
+		if(__fields.contains(name)) {
+			Reflect.setProperty(__class, name, value);
+			return value;
+		}
+		return null;
+	}
+}
+
+typedef StackPointer =  {
+	var __stack_id:Int;
+}
+#else
+typedef LuaScript = DummyScript;
+#end
