@@ -11,7 +11,7 @@ class MiscOptions extends TreeMenuScreen {
 		#if UPDATE_CHECKING
 		add(new Checkbox(getNameID('betaUpdates'), getDescID('betaUpdates'), 'betaUpdates'));
 		add(new TextOption(getNameID('checkForUpdates'), getDescID('checkForUpdates'), () -> {
-			var report = funkin.backend.system.updating.UpdateUtil.checkForUpdates();
+			var report = funkin.backend.system.updating.UpdateUtil.checkForUpdates(true);
 			if (report.newUpdate) FlxG.switchState(new funkin.backend.system.updating.UpdateAvailableScreen(report));
 			else {
 				CoolUtil.playMenuSFX(CANCEL);
