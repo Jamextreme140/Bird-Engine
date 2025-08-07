@@ -13,7 +13,7 @@ class LuaInfo extends FramerateCategory {
 		if (alpha <= 0.05) return;
 
 		_text = 'Version: $luaVersion';
-		_text += 'Version (JIT): $luaJITVersion';
+		_text += '\nVersion (JIT): $luaJITVersion';
 
 		this.text.text = _text;
 
