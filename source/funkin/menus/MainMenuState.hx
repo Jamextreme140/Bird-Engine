@@ -77,6 +77,7 @@ class MainMenuState extends MusicBeatState
 		FlxG.camera.follow(camFollow, null, 0.06);
 
 		versionText = new FunkinText(5, FlxG.height - 2, 0, [
+			Flags.BDE_VERSION_MESSAGE,
 			Flags.VERSION_MESSAGE,
 			TU.translate("mainMenu.commit", [Flags.COMMIT_NUMBER, Flags.COMMIT_HASH]),
 			TU.translate("mainMenu.openMods", [controls.getKeyName(SWITCHMOD)]),
@@ -125,9 +126,14 @@ class MainMenuState extends MusicBeatState
 				if (devModeCount++ == 2) {
 					FlxTween.tween(devModeWarning, {alpha: 1}, 0.4);
 				}
+				if (devModeCount >= 10 && devModeCount <= 50)
+					devModeWarning.text = 'I said, ENABLE DEVELOPER MODE YOU MORON!!!';
+				else
+					devModeWarning.text = "You have to enable DEVELOPER MODE in the miscellaneous settings!";
+
 				FlxTween.completeTweensOf(devModeWarning);
 				FlxTween.color(devModeWarning, 0.2, 0xFFFF0000, 0xFFFFFFFF);
-				FlxTween.shake(devModeWarning, 0.005);
+				FlxTween.shake(devModeWarning, 0.005, 0.3);
 				devModeWarning.y = FlxG.height - 75;
 				FlxTween.tween(devModeWarning, {y: FlxG.height - 50}, 0.4);
 			}

@@ -9,7 +9,6 @@ Based on Codename Engine, this custom engine includes:
 - Full Lua Script support over OOP-like programming **(i.e. Not compatible with Psych Lua)**
   - Gameplay Scripting
   - Customizable States/Substates (and Custom ones too)
-  - NDLL management
 
 ## PLEASE NOTE - THIS IS STILL IN A BETA STATE
 ### Mods created with beta versions of Codename may not be compatible with the release version
@@ -35,10 +34,10 @@ Codename Engine is a new Friday Night Funkin' Engine aimed at simplifying moddin
 
 ## How to download
 
-Latest builds for the engine can be found in the [Actions](https://github.com/YoshiCrafter29/CodenameEngine/actions) tab.<br>
+Latest builds for the engine can be found in the [Actions](https://github.com/CodenameCrew/CodenameEngine/actions) tab.<br>
 In the future (when the engine won't be a WIP anymore) we're gonna also publish the engine on platforms like Gamebanana; stay tuned!
 
-If you don't have a github account please go onto https://fnf-cne-devs.github.io/ and click the download button for the respective operating system.
+If you don't have a github account please go onto https://codename-engine.com/ and click the download button for the respective operating system.
 
 <details>
   <summary><h2>How to build</h2></summary>

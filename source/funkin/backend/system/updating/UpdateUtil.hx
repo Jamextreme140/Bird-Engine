@@ -20,7 +20,7 @@ class UpdateUtil {
 
 	public static function checkForUpdates():UpdateCheckCallback {
 		var curTag = 'v${Flags.VERSION}';
-		trace(curTag);
+		trace("Current version: " + curTag);
 
 		var error = false;
 
@@ -79,7 +79,6 @@ class UpdateUtil {
 				newArray.insert(0, release);
 				if (__curVersionPos > -2)
 					__curVersionPos++;
-				trace(release.tag_name);
 			}
 		}
 		if (__curVersionPos < -1)

@@ -15,7 +15,7 @@ class MiscOptions extends TreeMenuScreen {
 			if (report.newUpdate) FlxG.switchState(new funkin.backend.system.updating.UpdateAvailableScreen(report));
 			else {
 				CoolUtil.playMenuSFX(CANCEL);
-				updateDescText(translate('checkForUpdates-noUpdateFound'));
+				//updateDescText(translate('checkForUpdates-noUpdateFound'));
 			}
 		}));
 		#end

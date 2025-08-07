@@ -100,7 +100,29 @@ class LuaScript extends Script {
 		return v;
 	}
 
+	public static function getDefaultCallbacks(script:LuaScript):Map<String, Dynamic> {
+		return [
+			"translate" => funkin.backend.utils.TranslationUtil.get,
+			// HSCRIPT
+			"runScript" => function(code:String) {
+				script.initHScript();
+
+				return script.hscript.execute(code);
+			},
+			"parseFunction" => function(args:Null<Array<Dynamic>>, body:String) {
+				script.initHScript();
+				if(args == null) args = [];
+				var fullExpr = 'function(${args.join(',')}) {$body}';
+				var fn = script.hscript.execute(fullExpr);
+				return fn;
+			}
+		];
+	}
+
 	public var state(default, null):State;
+	/**
+	 * Do not edit directly, use `addCallback` and `removeCallback` instead.
+	 */
 	public var callbacks:StringMap<Dynamic> = new StringMap();
 
 	var lastStackID:Int = 0;
@@ -141,6 +163,8 @@ class LuaScript extends Script {
 		return scriptObject = v;
 	}
 
+	public var hscript(default, null):LuaHScript;
+
 	override function onCreate(path:String) {
 		super.onCreate(path);
 
@@ -177,7 +201,9 @@ class LuaScript extends Script {
 	}
 
 	function setDefaultCallbacks() {
-		addCallback("translate", funkin.backend.utils.TranslationUtil.get);
+		for(n => f in getDefaultCallbacks(this)) {
+			addCallback(n, f);
+		}
 		addCallback("import", function(n:String, ?as:String) {
 			var splitName:Array<String> = [for(e in n.split(".")) e.trim()];
 			var realName:String = splitName.join(".");
@@ -265,6 +291,9 @@ class LuaScript extends Script {
 
 	override function set(variable:String, value:Dynamic) {
 		if (state == null)
+			return;
+
+		if(Reflect.isFunction(value)) 
 			return;
 
 		if(value is Class) 
@@ -512,12 +541,56 @@ class LuaScript extends Script {
 		state.close();
 		state = null;
 	}
+
+	public function initHScript() {
+		if(hscript != null) return;
+
+		hscript = new LuaHScript('${haxe.io.Path.withoutExtension(this.path)}_hscript.hx');
+		hscript.setParent(scriptObject);
+		hscript.set('__lua__', this);
+	}
 }
 
 // same thing as IHScriptCustomBehaviour
 interface LuaAccess {
 	public function get(name:String):Dynamic;
 	public function set(name:String, value:Dynamic):Dynamic;
+}
+
+final class LuaHScript extends HScript implements hscript.IHScriptCustomBehaviour{
+	private var __variables:Array<String>;
+
+	public function new(path:String) {
+		super(path);
+
+		__variables = Type.getInstanceFields(Type.getClass(this));
+	}
+
+	public function execute(code:String):Dynamic {
+		var ret:Dynamic = null;
+		if (code != null && code.trim().length > 0) {
+			this.parser.line = 1;
+			this.loadFromString(code);
+			@:privateAccess
+			this.interp.execute(parser.mk(EBlock([]), 0, 0));
+			if (expr != null)
+				ret = interp.execute(expr);
+		}
+
+		return ret;
+	}
+
+	public function hget(name:String):Dynamic {
+		return __variables.contains(name) ? Reflect.getProperty(this, name) : this.get(name);
+	}
+
+	public function hset(name:String, val:Dynamic):Dynamic {
+		if (__variables.contains(name))
+			Reflect.setProperty(this, name, val);
+		else
+			this.set(name, val);
+		return val;
+	}
 }
 
 final class LuaClass implements LuaAccess {

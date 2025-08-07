@@ -49,8 +49,10 @@ class Flags {
 	@:bypass public static var WINDOW_TITLE_USE_MOD_NAME:Bool = false;
 	@:lazy public static var TITLE:String = Application.current.meta.get('name');
 	@:lazy public static var VERSION:String = Application.current.meta.get('version');
+	@:lazy public static var BDE_VERSION:String = '1.0';
 
-	@:lazy public static var VERSION_MESSAGE:String = 'Bird Engine (CNE) v$VERSION';
+	@:lazy public static var VERSION_MESSAGE:String = 'Codename Engine v$VERSION';
+	@:lazy public static var BDE_VERSION_MESSAGE:String = 'Bird Engine v$BDE_VERSION';
 
 	public static var REPO_NAME:String = "Bird-Engine";
 	public static var REPO_OWNER:String = "Jamextreme140";

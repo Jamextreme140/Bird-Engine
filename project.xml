@@ -5,7 +5,7 @@
 		title="Friday Night Funkin' - Bird Engine" main="funkin.backend.system.Main"
 		file="CodenameEngine" packageName="com.yoshman29.codenameengine"
 		package="com.yoshman29.codenameengine"
-		version="1.0.0" company="Yoshman29" />
+		version="1.0.1" company="Yoshman29" />
 
 	<!--
 		CHANGE THE SAVE PATH & NAME FOR YOUR MOD HERE!
