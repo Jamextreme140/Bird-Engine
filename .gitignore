@@ -9,6 +9,7 @@ pages/
 docs/doc.xml
 mods/*
 addons/*
+!mods/lua test/
 !mods/readme.txt
 addons/*
 !addons/readme.txt

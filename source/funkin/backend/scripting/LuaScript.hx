@@ -165,6 +165,11 @@ class LuaScript extends Script {
 
 	public var hscript(default, null):LuaHScript;
 
+	public function new(path:String) {
+		super(path);
+		setDefaultCallbacks();
+	}
+
 	override function onCreate(path:String) {
 		super.onCreate(path);
 
@@ -309,6 +314,7 @@ class LuaScript extends Script {
 
 	override function setParent(parent:Dynamic) {
 		this.scriptObject = parent;
+		set('this', parent);
 	}
 
 	public override function setPublicMap(map:Map<String, Dynamic>) {
@@ -336,6 +342,7 @@ class LuaScript extends Script {
 		if(callbacks.exists(id))
 			return callbacks.get(id);
 
+		// Not working rn
 		if(scriptObject != null) {
 			var instanceHasField:Bool = __instanceFields.contains(id);
 
@@ -614,12 +621,12 @@ final class LuaClass implements LuaAccess {
 	public function get(name:String):Dynamic {
 		if(name == 'new')
 			return __constructor;
-		
-		return __fields.contains(name) ? Reflect.getProperty(__class, name) : null;
+
+		return __fields.contains(name) || __fields.contains('get_$name') ? Reflect.getProperty(__class, name) : null;
 	}
 
 	public function set(name:String, value:Dynamic):Dynamic {
-		if(__fields.contains(name)) {
+		if(__fields.contains(name) || __fields.contains('set_$name')) {
 			Reflect.setProperty(__class, name, value);
 			return value;
 		}
