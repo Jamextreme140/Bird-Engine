@@ -29,24 +29,18 @@ class Paths
 		returnedPath = Path.normalize(returnedPath);
 		var fixedPath:String = library != null ? '$library:assets/$library/' : 'assets/';
 		var parts:Array<String> = returnedPath.split("/");
-		trace(parts);
 		for (it=>part in parts) {
 			if (it == 0) continue;
 			var entries:Array<String> = null;
 			if (Path.extension(part) == "") entries = assetsTree.getFolders(fixedPath);
 			else entries = assetsTree.getFiles(fixedPath);
 			for (entry in entries) {
-				trace(part, entry);
 				if (entry.toLowerCase() == part.toLowerCase()) {
 					fixedPath += entry + (it != parts.length - 1 ? "/" : "");
 				}
 			}
 		}
-		if (returnedPath.toLowerCase() != fixedPath.toLowerCase()) {
-			trace("this shit broke!!!");
-			trace(fixedPath);
-		}
-		else returnedPath = fixedPath;
+		if (returnedPath.toLowerCase() == fixedPath.toLowerCase()) returnedPath = fixedPath;
 		#end
 		return returnedPath;
 	}
