@@ -26,8 +26,8 @@ class Flags {
 	public static var MOD_DOWNLOAD_LINK:String  = "";
 	public static var MOD_DEPENDENCIES:Array<String> = [];
 
-	@:noCompletion public static var MOD_ICON64:String = "";
 	@:noCompletion public static var MOD_ICON32:String = "";
+	@:noCompletion public static var MOD_ICON24:String = "";
 	@:noCompletion public static var MOD_ICON16:String = "";
 	public static var MOD_ICON:String = "";
 
@@ -46,6 +46,7 @@ class Flags {
 	public static var COMMIT_HASH:String = GitCommitMacro.commitHash;
 	public static var COMMIT_MESSAGE:String = 'Commit $COMMIT_NUMBER ($COMMIT_HASH)';
 
+	@:bypass public static var WINDOW_TITLE_USE_MOD_NAME:Bool = false;
 	@:lazy public static var TITLE:String = Application.current.meta.get('name');
 	@:lazy public static var VERSION:String = Application.current.meta.get('version');
 
@@ -136,7 +137,14 @@ class Flags {
 	public static var DEFAULT_CAM_ZOOM_STRENGTH:Int = 1;
 	public static var DEFAULT_CAM_ZOOM:Float = 1.05; // what zoom level it defaults to
 	public static var DEFAULT_HUD_ZOOM:Float = 1.0;
-	public static var MAX_CAMERA_ZOOM_MULT:Float = 1.35;
+	public static var DEFAULT_ZOOM:Float = 1.0;
+	public static var DEFAULT_ZOOM_LERP:Float = 0.05;
+	public static var MAX_CAMERA_ZOOM_MULT:Float = 10;
+	public static var USE_CAM_ZOOM_MULT:Bool = true;
+	public static var DEFAULT_CAM_ZOOM_MULT:Float = 0.015;
+	public static var DEFAULT_HUD_ZOOM_MULT:Float = 0.03;
+	public static var DEFAULT_CAM_ZOOM_LERP:Float = 0.05;
+	public static var DEFAULT_HUD_ZOOM_LERP:Float = 0.05;
 
 	// to translate these you need to convert them into ids
 	// Resume -> pause.resume
@@ -163,11 +171,6 @@ class Flags {
 
 	public static var DEFAULT_INTRO_LENGTH:Int = 5;
 	public static var DEFAULT_INTRO_SPRITES:Array<String> = [null, 'game/ready', 'game/set', 'game/go'];
-
-	public static var CAM_BOP_STRENGTH:Float = 0.015;
-	public static var HUD_BOP_STRENGTH:Float = 0.03;
-	public static var DEFAULT_CAM_ZOOM_LERP:Float = 0.05;
-	public static var DEFAULT_HUD_ZOOM_LERP:Float = 0.05;
 
 	public static var MAX_SPLASHES:Int = 8;
 	public static var STUNNED_TIME:Float = 5 / 60;
@@ -281,6 +284,8 @@ class Flags {
 					else trace('Invalid section $name');
 			}
 		}
+
+		if (!flags.exists("WINDOW_TITLE_USE_MOD_NAME")) flags.set("WINDOW_TITLE_USE_MOD_NAME", flags.exists('TITLE') ? 'false' : 'true');
 	}
 
 	public static function loadFromDatas(datas:Array<String>) {

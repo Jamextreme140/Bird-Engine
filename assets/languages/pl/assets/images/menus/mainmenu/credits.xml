@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TextureAtlas imagePath="credits.png" width="3020" height="169">
+	<SubTexture name="credits basic0000" x="1" y="1" width="430" height="114" frameX="-0" frameY="-0" frameWidth="430" frameHeight="114"/>
+	<SubTexture name="credits basic0001" x="1" y="1" width="430" height="114" frameX="-0" frameY="-0" frameWidth="430" frameHeight="114"/>
+	<SubTexture name="credits basic0002" x="1" y="1" width="430" height="114" frameX="-0" frameY="-0" frameWidth="430" frameHeight="114"/>
+	<SubTexture name="credits basic0003" x="433" y="1" width="430" height="114" frameX="-0" frameY="-0" frameWidth="430" frameHeight="114"/>
+	<SubTexture name="credits basic0004" x="433" y="1" width="430" height="114" frameX="-0" frameY="-0" frameWidth="430" frameHeight="114"/>
+	<SubTexture name="credits basic0005" x="433" y="1" width="430" height="114" frameX="-0" frameY="-0" frameWidth="430" frameHeight="114"/>
+	<SubTexture name="credits basic0006" x="865" y="1" width="430" height="114" frameX="-0" frameY="-0" frameWidth="430" frameHeight="114"/>
+	<SubTexture name="credits basic0007" x="865" y="1" width="430" height="114" frameX="-0" frameY="-0" frameWidth="430" frameHeight="114"/>
+	<SubTexture name="credits basic0008" x="865" y="1" width="430" height="114" frameX="-0" frameY="-0" frameWidth="430" frameHeight="114"/>
+	<SubTexture name="credits white0000" x="1297" y="1" width="574" height="164" frameX="-0" frameY="24" frameWidth="574" frameHeight="169"/>
+	<SubTexture name="credits white0001" x="2446" y="1" width="573" height="167" frameX="-0" frameY="25" frameWidth="574" frameHeight="169"/>
+	<SubTexture name="credits white0002" x="1873" y="1" width="571" height="165" frameX="-0" frameY="21" frameWidth="574" frameHeight="169"/>
+</TextureAtlas>

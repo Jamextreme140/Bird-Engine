@@ -23,8 +23,33 @@ class Paths
 		});
 	}
 
-	public static inline function getPath(file:String, ?library:String)
-		return library != null ? '$library:assets/$library/$file' : 'assets/$file';
+	public static inline function getPath(file:String, ?library:String) {
+		var returnedPath:String = library != null ? '$library:assets/$library/$file' : 'assets/$file';
+		#if linux
+		returnedPath = Path.normalize(returnedPath);
+		var fixedPath:String = library != null ? '$library:assets/$library/' : 'assets/';
+		var parts:Array<String> = returnedPath.split("/");
+		trace(parts);
+		for (it=>part in parts) {
+			if (it == 0) continue;
+			var entries:Array<String> = null;
+			if (Path.extension(part) == "") entries = assetsTree.getFolders(fixedPath);
+			else entries = assetsTree.getFiles(fixedPath);
+			for (entry in entries) {
+				trace(part, entry);
+				if (entry.toLowerCase() == part.toLowerCase()) {
+					fixedPath += entry + (it != parts.length - 1 ? "/" : "");
+				}
+			}
+		}
+		if (returnedPath.toLowerCase() != fixedPath.toLowerCase()) {
+			trace("this shit broke!!!");
+			trace(fixedPath);
+		}
+		else returnedPath = fixedPath;
+		#end
+		return returnedPath;
+	}
 
 	public static inline function video(key:String, ?ext:String)
 		return getPath('videos/$key.${ext != null ? ext : Flags.VIDEO_EXT}');

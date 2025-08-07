@@ -364,6 +364,11 @@ class PlayState extends MusicBeatState
 	public var camGameZoomLerp:Float = Flags.DEFAULT_CAM_ZOOM_LERP;
 
 	/**
+	 * The current multiplier for game camera zooming.
+	 */
+	public var camGameZoomMult:Float = Flags.DEFAULT_CAM_ZOOM_MULT;
+
+	/**
 	 * Camera zoom at which the hud lerps to.
 	 */
 	public var defaultHudZoom:Float = Flags.DEFAULT_HUD_ZOOM;
@@ -371,6 +376,21 @@ class PlayState extends MusicBeatState
 	 * Speed at which the hud camera zoom lerps to.
 	 */
 	public var camHUDZoomLerp:Float = Flags.DEFAULT_HUD_ZOOM_LERP;
+	/**
+	 * The current multiplier for game camera zooming.
+	 */
+	public var camHUDZoomMult:Float = Flags.DEFAULT_HUD_ZOOM_MULT;
+
+	/**
+	 * Camera zoom at which the cameras that zooms lerps to.
+	 * (Only used if useCamZoomMult is on).
+	 */
+	public var defaultZoom:Float = Flags.DEFAULT_ZOOM;
+	/**
+	 * Speed at which the cameras that zooms zoom lerps to.
+	 * (Only used if useCamZoomMult is on).
+	 */
+	public var camZoomLerp:Float = Flags.DEFAULT_ZOOM_LERP;
 
 	/**
 	 * Whenever cam zooming is enabled, enables on a note hit if not cancelled.
@@ -405,11 +425,20 @@ class PlayState extends MusicBeatState
 	  */
 	public var maxCamZoomMult:Float = Flags.MAX_CAMERA_ZOOM_MULT;
 	/**
+	 * Whether it should use a implementation where it multiplies the current camera zoom instead.
+	 */
+	public var useCamZoomMult:Bool = Flags.USE_CAM_ZOOM_MULT;
+	/**
+	 * The current multiplier for camera zooming.
+	 * (Only used if useCamZoomMult is on).
+	 */
+	public var camZoomingMult:Float = Flags.DEFAULT_ZOOM;
+	/**
 	  * Maximum amount of zoom for the camera (based on `maxCamZoomMult` and the camera's zoom IF not set).
 	  */
 	public var maxCamZoom(get, default):Float = Math.NaN;
 
-	private inline function get_maxCamZoom() return Math.isNaN(maxCamZoom) ? maxCamZoomMult * defaultCamZoom : maxCamZoom;
+	private inline function get_maxCamZoom() return Math.isNaN(maxCamZoom) ? defaultCamZoom + (camZoomingMult * camGameZoomMult) : maxCamZoom;
 
 	/**
 	 * Zoom for the pixel assets.
@@ -1324,12 +1353,17 @@ class PlayState extends MusicBeatState
 		if (canAccessDebugMenus && chartingMode && controls.DEV_ACCESS)
 			FlxG.switchState(new funkin.editors.charter.Charter(SONG.meta.name, difficulty, false));
 
-		if (Options.camZoomOnBeat && camZooming && FlxG.camera.zoom < maxCamZoom) {
+		if (Options.camZoomOnBeat && camZooming) {
 			var beat = Conductor.getBeats(camZoomingEvery, camZoomingInterval, camZoomingOffset);
 			if (camZoomingLastBeat != beat) {
 				camZoomingLastBeat = beat;
-				FlxG.camera.zoom += 0.015 * camZoomingStrength;
-				camHUD.zoom += 0.03 * camZoomingStrength;
+				if (useCamZoomMult) {
+					if (camZoomingMult < maxCamZoomMult) camZoomingMult += camZoomingStrength;
+				}
+				else if (FlxG.camera.zoom < maxCamZoom) {
+					FlxG.camera.zoom += camGameZoomMult * camZoomingStrength;
+					camHUD.zoom += camHUDZoomMult * camZoomingStrength;
+				}
 			}
 		}
 
@@ -1372,6 +1406,12 @@ class PlayState extends MusicBeatState
 			moveCamera();
 
 		if (camZooming) {
+			if (useCamZoomMult) {
+				camZoomingMult = lerp(camZoomingMult, defaultZoom, camZoomLerp) - defaultZoom;
+				FlxG.camera.zoomMultiplier = camZoomingMult * camGameZoomMult + defaultZoom;
+				camHUD.zoomMultiplier = camZoomingMult * camHUDZoomMult + defaultZoom;
+				camZoomingMult += defaultZoom;
+			}
 			FlxG.camera.zoom = lerp(FlxG.camera.zoom, defaultCamZoom, camGameZoomLerp);
 			camHUD.zoom = lerp(camHUD.zoom, defaultHudZoom, camHUDZoomLerp);
 		}
@@ -1530,6 +1570,8 @@ class PlayState extends MusicBeatState
 			case "Add Camera Zoom":
 				var camera:FlxCamera = event.params[1] == "camHUD" ? camHUD : camGame;
 				camera.zoom += event.params[0];
+			case "Camera Bop":
+				camZoomingMult += event.params[0];
 			case "Camera Zoom":
 				var cam = event.params[2] == "camHUD" ? camHUD : camGame;
 				var name = (event.params[2] == "camHUD" ? "camHUD" : "camGame") + ".zoom";  // avoiding having different values from these 2  - Nex
