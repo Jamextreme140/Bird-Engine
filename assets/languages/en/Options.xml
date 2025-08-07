@@ -50,6 +50,8 @@
 		</group>
 
 		<str id="category.volume">Volume</str>
+		<str id="volume.up">Up</str>
+		<str id="volume.down">Down</str>
 		<str id="volume.mute">Mute</str>
 
 		<str id="category.developer">Developer</str>

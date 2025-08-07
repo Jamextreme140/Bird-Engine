@@ -1690,17 +1690,12 @@ class PlayState extends MusicBeatState
 		endingSong = true;
 		gameAndCharsCall("onSongEnd");
 		canPause = false;
-		inst.volume = 0;
-		vocals.volume = 0;
-		for (strumLine in strumLines.members) {
-			strumLine.vocals.volume = 0;
-			strumLine.vocals.pause();
-		}
-		inst.pause();
-		vocals.pause();
 
-		if (validScore)
-		{
+		for (strumLine in strumLines.members) strumLine.vocals.stop();
+		inst.stop();
+		vocals.stop();
+
+		if (validScore) {
 			#if !switch
 			FunkinSave.setSongHighscore(SONG.meta.name, difficulty, {
 				score: songScore,
@@ -1728,20 +1723,18 @@ class PlayState extends MusicBeatState
 	 * Immediately switches to the next song, or goes back to the Story/Freeplay menu.
 	 */
 	public function nextSong() {
-		if (isStoryMode)
-		{
+		if (isStoryMode) {
 			campaignScore += songScore;
 			campaignMisses += misses;
 			campaignAccuracyTotal += accuracy;
 			campaignAccuracyCount++;
 			storyPlaylist.shift();
 
-			if (storyPlaylist.length <= 0)
-			{
+			if (storyPlaylist.length <= 0) {
 				FlxG.switchState(new StoryMenuState());
 
-				if (validScore)
-				{
+				if (validScore) {
+					#if !switch
 					// TODO: more week info saving
 					FunkinSave.setWeekHighscore(storyWeek.id, difficulty, {
 						score: campaignScore,
@@ -1750,29 +1743,23 @@ class PlayState extends MusicBeatState
 						hits: [],
 						date: Date.now().toString()
 					});
+					#end
 				}
 				FlxG.save.flush();
 			}
-			else
-			{
+			else {
 				Logs.infos('Loading next song (${storyPlaylist[0].toLowerCase()}/$difficulty)', "PlayState");
 
 				registerSmoothTransition();
 
-				FlxG.sound.music.stop();
-
 				__loadSong(storyPlaylist[0], difficulty);
-
 				FlxG.switchState(new PlayState());
 			}
 		}
+		else if (chartingMode)
+			FlxG.switchState(new funkin.editors.charter.Charter(SONG.meta.name, difficulty, false));
 		else
-		{
-			if (chartingMode)
-				FlxG.switchState(new funkin.editors.charter.Charter(SONG.meta.name, difficulty, false));
-			else
-				FlxG.switchState(new FreeplayState());
-		}
+			FlxG.switchState(new FreeplayState());
 	}
 
 	public function registerSmoothTransition() {
@@ -1944,6 +1931,8 @@ class PlayState extends MusicBeatState
 		}
 
 		if (event.deleteNote) strumLine.deleteNote(note);
+
+		gameAndCharsEvent("onPostNoteHit", event);
 	}
 
 	public function displayRating(myRating:String, ?evt:NoteHitEvent = null):Void {
