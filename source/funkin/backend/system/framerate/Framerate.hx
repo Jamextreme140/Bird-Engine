@@ -75,6 +75,9 @@ class Framerate extends Sprite {
 		__addCategory(new ConductorInfo());
 		__addCategory(new FlixelInfo());
 		__addCategory(new SystemInfo());
+		#if ENABLE_LUA
+		__addCategory(new LuaInfo());
+		#end
 		__addCategory(new AssetTreeInfo());
 
 		#if (gl_stats && !disable_cffi && (!html5 || !canvas))
