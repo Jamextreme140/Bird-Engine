@@ -154,9 +154,7 @@ class LuaScript extends Script {
 
 		if(v != null && __instanceFields.length > 0) {
 			for(field in __instanceFields) {
-				var f:Dynamic = Reflect.field(v, field);
-				if(!Reflect.isFunction(f))
-					set(field, f);
+				set(field, Reflect.field(v, field));
 			}
 		}
 
@@ -298,9 +296,6 @@ class LuaScript extends Script {
 		if (state == null)
 			return;
 
-		if(Reflect.isFunction(value)) 
-			return;
-
 		if(value is Class) 
 			setClassPointer(value);
 		/*
@@ -314,7 +309,7 @@ class LuaScript extends Script {
 
 	override function setParent(parent:Dynamic) {
 		this.scriptObject = parent;
-		set('this', parent);
+		set('this', this.scriptObject);
 	}
 
 	public override function setPublicMap(map:Map<String, Dynamic>) {
@@ -333,7 +328,6 @@ class LuaScript extends Script {
 		super.destroy();
 	}
 
-	// checks for a local callback and then it look-up for a parent function
 	public function resolveCallback(id:String):haxe.Constraints.Function {
 		if (id == null)
 			return null;
@@ -341,14 +335,6 @@ class LuaScript extends Script {
 
 		if(callbacks.exists(id))
 			return callbacks.get(id);
-
-		// Not working rn
-		if(scriptObject != null) {
-			var instanceHasField:Bool = __instanceFields.contains(id);
-
-			if(instanceHasField)
-				return Reflect.getProperty(scriptObject, id);
-		}
 
 		return null;
 	}

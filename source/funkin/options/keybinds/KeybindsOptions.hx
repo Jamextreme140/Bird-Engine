@@ -97,6 +97,10 @@ class KeybindsOptions extends MusicBeatSubstate {
 						name: translate("ui.pause"),
 						control: 'PAUSE'
 					},
+					{
+						name: translate("ui.changeMode"),
+						control: 'CHANGE_MODE'
+					},
 				]
 			},
 		{

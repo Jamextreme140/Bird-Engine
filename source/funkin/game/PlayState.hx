@@ -553,7 +553,7 @@ class PlayState extends MusicBeatState
 	@:noCompletion @:dox(hide) private var _endSongCalled:Bool = false;
 
 	@:dox(hide)
-	var __vocalSyncTimer:Float = 0;
+	var __vocalSyncTimer:Float = 1;
 
 	private function get_accuracy():Float {
 		if (accuracyPressedNotes <= 0) return -1;
@@ -1114,12 +1114,10 @@ class PlayState extends MusicBeatState
 		curSong = songData.meta.name.toLowerCase();
 		curSongID = curSong.replace(" ", "-");
 
-		FlxG.sound.setMusic(inst = FlxG.sound.load(Assets.getMusic(Paths.inst(SONG.meta.name, difficulty))));
-		if (SONG.meta.needsVoices != false && Assets.exists(Paths.voices(SONG.meta.name, difficulty))) // null or true
-			vocals = FlxG.sound.load(Options.streamedVocals ? Assets.getMusic(Paths.voices(SONG.meta.name, difficulty)) : Paths.voices(SONG.meta.name, difficulty));
-		else
-			vocals = new FlxSound();
+		FlxG.sound.setMusic(inst = FlxG.sound.load(Assets.getMusic(Paths.inst(SONG.meta.name, difficulty, SONG.meta.instSuffix))));
 
+		var vocalsPath = Paths.voices(SONG.meta.name, difficulty);
+		vocals = Assets.exists(vocalsPath) ? FlxG.sound.load(Options.streamedVocals ? Assets.getMusic(vocalsPath) : vocalsPath) : new FlxSound();
 		vocals.group = FlxG.sound.defaultMusicGroup;
 		vocals.persist = false;
 
@@ -1225,7 +1223,7 @@ class PlayState extends MusicBeatState
 		var time = Conductor.songPosition + Conductor.songOffset;
 		for (strumLine in strumLines.members) strumLine.vocals.play(true, time);
 		vocals.play(true, time);
-		inst.play(true, time);
+		if (!inst.playing) inst.play(true, time);
 
 		gameAndCharsCall("onVocalsResync");
 	}
@@ -1376,20 +1374,19 @@ class PlayState extends MusicBeatState
 			updateIconPositions();
 
 		if (startingSong) {
-			if (startedCountdown) {
-				Conductor.songPosition += Conductor.songOffset + elapsed * 1000;
-				if (Conductor.songPosition >= 0)
-					startSong();
+			if (startedCountdown && (Conductor.songPosition += Conductor.songOffset + elapsed * 1000) >= 0) {
+				Conductor.songPosition = Conductor.songOffset;
+				startSong();
 			}
 		}
 		else if (FlxG.sound.music != null && (__vocalSyncTimer -= elapsed) < 0) {
 			__vocalSyncTimer = 1;
 
 			var instTime = FlxG.sound.music.getActualTime();
-			var isOffsync:Bool = vocals.loaded && Math.abs(instTime - vocals.getActualTime()) > 30;
+			var isOffsync:Bool = vocals.loaded && Math.abs(instTime - vocals.getActualTime()) > 100;
 			if (!isOffsync) {
 				for (strumLine in strumLines.members) {
-					if ((isOffsync = strumLine.vocals.loaded && Math.abs(instTime - strumLine.vocals.getActualTime()) > 30)) break;
+					if ((isOffsync = strumLine.vocals.loaded && Math.abs(instTime - strumLine.vocals.getActualTime()) > 100)) break;
 				}
 			}
 

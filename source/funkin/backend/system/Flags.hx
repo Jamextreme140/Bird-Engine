@@ -54,8 +54,10 @@ class Flags {
 	@:lazy public static var VERSION_MESSAGE:String = 'Codename Engine v$VERSION';
 	@:lazy public static var BDE_VERSION_MESSAGE:String = 'Bird Engine v$BDE_VERSION';
 
-	public static var REPO_NAME:String = "Bird-Engine";
-	public static var REPO_OWNER:String = "Jamextreme140";
+	public static var REPO_NAME:String = "CodenameEngine";
+	public static var REPO_OWNER:String = "CodenameCrew";
+	public static var BDE_REPO_NAME:String = "Bird-Engine";
+	public static var BDE_REPO_OWNER:String = "Jamextreme140";
 	public static var REPO_URL:String = 'https://github.com/$REPO_OWNER/$REPO_NAME';
 
 	/**

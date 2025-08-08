@@ -6,13 +6,11 @@ local ab = 0.005
 local ab1 = 0.0008
 local bpm
 
-local spr
-local chrom
-
-local sprTween
+local spr -- FlxSprite
+local chrom -- CustomShader
 
 function new()
-	print('"new" constructor :3')
+	print('"new" constructor')
 end
 
 function postCreate()
@@ -20,15 +18,13 @@ function postCreate()
 
 	spr = FlxSprite.new(0, 0)
 	spr.loadGraphic(Paths.image('credits/credit icon example'))
-	spr.setPosition(posX, 200)
-	spr.scrollFactor.x = 0
-	spr.scrollFactor.y = 0
-	spr.scale.x = 0.2
-	spr.scale.y = 0.2
+	spr.setPosition(posX, 400)
+	spr.scrollFactor.set(0, 0)
+	spr.scale.set(0.5, 0.5)
 	spr.updateHitbox()
-	this.add(spr)
+	add(spr)
 
-	sprTween = FlxTween.tween(spr, {x = posX + 100}, (60/bpm), {ease = FlxEase.circInOut, type = FlxTween.PINGPONG})
+	FlxTween.tween(spr, {x = posX + 100}, (60/bpm), {ease = FlxEase.circInOut, type = FlxTween.PINGPONG})
 
 	chrom = CustomShader.new('chromaticAberration')
 	FlxG.camera.addShader(chrom)

@@ -42,6 +42,7 @@
 			<str id="back">Back</str>
 			<str id="reset">Reset</str>
 			<str id="pause">Pause</str>
+			<str id="changeMode">Change Mode</str>
 		</group>
 
 		<str id="category.engine">Engine</str>

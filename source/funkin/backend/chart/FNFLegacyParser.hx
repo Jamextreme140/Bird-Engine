@@ -40,7 +40,6 @@ class FNFLegacyParser {
 		}
 
 		result.meta.bpm = data.bpm;
-		result.meta.needsVoices = data.needsVoices.getDefault(true);
 
 		var camFocusedBF:Bool = false;
 		var altAnims:Bool = false;
@@ -157,7 +156,7 @@ class FNFLegacyParser {
 			notes: null,
 			bpm: chart.meta.bpm,
 			speed: chart.scrollSpeed,
-			needsVoices: chart.meta.needsVoices,
+			needsVoices: true,
 
 			player1: null,
 			player2: null,

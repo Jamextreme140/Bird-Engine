@@ -7,6 +7,9 @@ class Config {
 		"flixel",
 
 		"funkin",
+
+		"modchart.engine.modifiers",
+		"modchart.engine.events",
 		#end
 	];
 

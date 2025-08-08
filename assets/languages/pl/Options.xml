@@ -38,6 +38,7 @@
 			<str id="back">Wstecz</str>
 			<str id="reset">Reset</str>
 			<str id="pause">Pauza</str>
+			<str id="changeMode">Zmień Tryb</str>
 		</group>
 
 		<str id="category.engine">Silnik</str>

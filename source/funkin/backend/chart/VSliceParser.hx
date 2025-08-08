@@ -67,7 +67,6 @@ class VSliceParser {
 
 		var timeChanges = metadata.timeChanges;
 		result.meta.bpm = timeChanges[0].bpm;
-		result.meta.needsVoices = true;
 
 		for (note in data)
 		{
