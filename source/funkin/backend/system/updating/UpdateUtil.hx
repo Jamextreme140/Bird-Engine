@@ -63,7 +63,7 @@ class UpdateUtil {
 	}
 
 	static function __checkForUpdates():UpdateCheckCallback {
-		var curTag = 'v${Flags.VERSION}', error = false;
+		var curTag = 'v' + (Flags.VERSION == null ? Application.current.meta.get('version') : Flags.VERSION), error = false;
 		var newUpdates = __doReleaseFiltering(GitHub.getReleases(Flags.REPO_OWNER, Flags.REPO_NAME, (e) -> {
 			error = true;
 		}), curTag);

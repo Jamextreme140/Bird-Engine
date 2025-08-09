@@ -10,6 +10,7 @@ class Config {
 
 		"modchart.engine.modifiers",
 		"modchart.engine.events",
+		"modchart.backend.standalone"
 		#end
 	];
 

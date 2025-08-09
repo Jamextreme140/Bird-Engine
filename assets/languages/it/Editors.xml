@@ -108,8 +108,9 @@
 			<str id="color">Colore</str>
 			<str id="difficulties">Difficoltà</str>
 			<str id="customValues">Valori Personalizzati (Avanzato)</str>
+			<str id="needsVoices">Bisogno Voci</str>
 
-			<str id="opponentMode">Modalità Avvers.</str>
+			<str id="opponentMode">Modalità Avvers</str>
 			<str id="coopAllowed">Modalità Co-op</str>
 		</group>
 

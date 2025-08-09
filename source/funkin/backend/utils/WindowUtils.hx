@@ -29,9 +29,6 @@ final class WindowUtils {
 	public static inline function resetClosing() __triedClosing = false;
 
 	@:dox(hide) public static inline function init() {
-		resetTitle();
-		resetClosing();
-
 		Lib.application.window.onClose.add(function () {
 			if (preventClosing && !__triedClosing) {
 				Lib.application.window.onClose.cancel();
@@ -53,7 +50,7 @@ final class WindowUtils {
 	 * Resets the prefix and suffix.
 	 * @param update Should it update window title.
 	**/
-	public static inline function resetAffixes(update:Bool = true) {
+	public static inline function resetAffixes(update = true) {
 		prefix = suffix = "";
 		if (update) updateTitle();
 	}

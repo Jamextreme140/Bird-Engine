@@ -23,7 +23,7 @@ typedef SongCreationData = {
 }
 
 class SongCreationScreen extends UISubstateWindow {
-	private var onSave:Null<SongCreationData> -> Null<String -> SongCreationData -> Void> -> Void = null;
+	private var onSave:Null<SongCreationData> -> Null<String -> Void> -> Void = null;
 
 	public var songNameTextBox:UITextBox;
 	public var bpmStepper:UINumericStepper;
@@ -72,7 +72,7 @@ class SongCreationScreen extends UISubstateWindow {
 
 	public var curPage:Int = 0;
 
-	public function new(?onSave:SongCreationData -> Null<String -> SongCreationData -> Void> -> Void) {
+	public function new(?onSave:SongCreationData -> Null<String -> Void> -> Void) {
 		super();
 		if (onSave != null) this.onSave = onSave;
 	}
@@ -356,6 +356,13 @@ class SongCreationScreen extends UISubstateWindow {
 		iconSprite.scrollFactor.set(1, 1);
 	}
 
+	// for variations
+	function formatMeta(meta:ChartMetaData):ChartMetaData
+		return funkin.backend.chart.Chart.defaultChartMetaFields(meta);
+
+	function getChartSavePath(meta:ChartMetaData, diff:String):String
+		return 'charts/${meta.variant != null && meta.variant != "" ? meta.variant + "/" : ""}$diff.json';
+
 	function saveSongInfo() {
 		if (isImporting)
 		{
@@ -384,26 +391,27 @@ class SongCreationScreen extends UISubstateWindow {
 						strumLines: [],
 						noteTypes: [],
 						events: [],
-						meta: {name: null},
+						meta: {name: songId},
 						scrollSpeed: Flags.DEFAULT_SCROLL_SPEED,
 						stage: Flags.DEFAULT_STAGE,
 						codenameChart: true
 					};
 					PsychParser.parse(oldChart, base);
+					var meta = formatMeta({
+						name: songId,
+						difficulties: ['normal'],
+						bpm: oldChart.bpm,
+						beatsPerMeasure: oldChart.beatsPerMeasure,
+						stepsPerBeat: oldChart.stepsPerBeat,
+						displayName: oldChart.song
+					});
 					if (onSave != null) onSave({
-						meta: {
-							name: songId,
-							difficulties: [songId],
-							bpm: oldChart.bpm,
-							beatsPerMeasure: oldChart.beatsPerMeasure,
-							stepsPerBeat: oldChart.stepsPerBeat,
-							displayName: oldChart.song
-						},
+						meta: meta,
 						instBytes: importInstExplorer.file,
 						voicesBytes: importVoicesExplorer.file,
-					}, (songFolder:String, creation:SongCreationData) -> {
+					}, (songFolder:String) -> {
 						#if sys
-						CoolUtil.safeSaveFile('$songFolder/charts/${songId}.json', Json.stringify(base, Flags.JSON_PRETTY_PRINT));
+						CoolUtil.safeSaveFile('$songFolder/${getChartSavePath(meta, "normal")}', Json.stringify(base, Flags.JSON_PRETTY_PRINT));
 						#end
 					});
 			} catch (e:haxe.Exception) {
@@ -415,7 +423,7 @@ class SongCreationScreen extends UISubstateWindow {
 			for (stepper in [bpmStepper, beatsPerMeasureStepper, denominatorStepper])
 				@:privateAccess stepper.__onChange(stepper.label.text);
 
-			var meta:ChartMetaData = {
+			var meta:ChartMetaData = formatMeta({
 				name: songNameTextBox.label.text,
 				bpm: bpmStepper.value,
 				beatsPerMeasure: Std.int(beatsPerMeasureStepper.value),
@@ -425,8 +433,8 @@ class SongCreationScreen extends UISubstateWindow {
 				color: colorWheel.curColor,
 				opponentModeAllowed: opponentModeCheckbox.checked,
 				coopAllowed: coopAllowedCheckbox.checked,
-				difficulties: [for (diff in difficultiesTextBox.label.text.split(",")) diff.trim()],
-			};
+				difficulties: [for (diff in difficultiesTextBox.label.text.split(",")) diff.trim()]
+			});
 
 			if (onSave != null) onSave({
 				meta: meta,
@@ -442,9 +450,12 @@ class SongCreationScreen extends UISubstateWindow {
 		var vslicechart:NewSwagSong = Json.parse(files.get('${songId}-chart.json'));
 		var playData = vslicemeta.playData;
 
-		var meta:ChartMetaData = {name: songId};
-		var diffCharts:Array<ChartDataWithInfo> = [];
+		var meta:ChartMetaData = formatMeta({name: songId});
+		var diffCharts:Array<ChartDataWithInfo> = [], events:Array<ChartEvent> = null;
 		VSliceParser.parse(vslicemeta, vslicechart, meta, diffCharts, songId);
+
+		if (diffCharts.length != 0) events = diffCharts[0].chart.events;
+		for (diff in diffCharts) diff.chart.events = [];
 
 		if (onSave != null) onSave({
 			meta: meta,
@@ -452,9 +463,10 @@ class SongCreationScreen extends UISubstateWindow {
 			voicesBytes: files.get('Voices.${Flags.SOUND_EXT}'), //it may exist
 			playerVocals: files.get('Voices-${playData.characters.playerVocals != null ? playData.characters.playerVocals[0] : playData.characters.player}.${Flags.SOUND_EXT}'),
 			oppVocals: files.get('Voices-${playData.characters.opponentVocals != null ? playData.characters.opponentVocals[0] : playData.characters.opponent}.${Flags.SOUND_EXT}'),
-		}, (songFolder:String, creation:SongCreationData) -> {
+		}, (songFolder:String) -> {
 			#if sys
-			for (diff in diffCharts) CoolUtil.safeSaveFile('$songFolder/charts/${diff.diffName}.json', Json.stringify(diff.chart, Flags.JSON_PRETTY_PRINT));
+			for (diff in diffCharts) CoolUtil.safeSaveFile('$songFolder/${getChartSavePath(meta, diff.diffName)}', Json.stringify(diff.chart, Flags.JSON_PRETTY_PRINT));
+			if (events != null) CoolUtil.safeSaveFile('$songFolder/events${meta.variant != null && meta.variant != "" ? "-" + meta.variant : ""}.json', Json.stringify({events: events}, Flags.JSON_PRETTY_PRINT));
 			#end
 		});
 	}

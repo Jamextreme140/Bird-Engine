@@ -161,9 +161,9 @@ class NativeAudioSource {
 	}
 
 	private function complete() {
-		completed = true;
+		if (!completed) parent.onComplete.dispatch();
 		stop();
-		parent.onComplete.dispatch();
+		completed = true;
 	}
 
 	// Streaming, atleast for vorbis for now.
