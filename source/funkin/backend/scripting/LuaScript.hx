@@ -22,6 +22,10 @@ using llua.LuaL;
 using llua.Convert;
 using Lambda;
 
+typedef StackPointer =  {
+	var __stack_id:Int;
+}
+
 /**
  * Based on code from Codename Engine "lua-test" branch
  * 
@@ -93,6 +97,10 @@ class LuaScript extends Script {
 		return callbackHandler(cast Pointer.fromRaw(state).ref, "__onPointerCall");
 	}
 
+	static function __eq(state:StatePointer):Int {
+		return callbackHandler(cast Pointer.fromRaw(state).ref, "__onPointerEqual");
+	}
+
 	static function __gc(state:StatePointer):Int {
 		// callbackPreventAutoConvert = true;
 		var v = callbackHandler(cast Pointer.fromRaw(state).ref, "__gc");
@@ -131,6 +139,8 @@ class LuaScript extends Script {
 
 	var lastStackID:Int = 0;
 	var stack:IntMap<Dynamic> = new IntMap();
+	//var lastFunctionStackID:Int = 0;
+	//var functionStack(default, null):IntMap<LuaFunction> = new IntMap();
 
 	public var scriptObject(default, set):Dynamic;
 	var __instanceFields:Array<String> = [];
@@ -184,6 +194,7 @@ class LuaScript extends Script {
 		callbacks.set("__onPointerIndex", onPointerIndex);
 		callbacks.set("__onPointerNewIndex", onPointerNewIndex);
 		callbacks.set("__onPointerCall", onPointerCall);
+		callbacks.set("__onPointerEqual", onPointerEqual);
 		callbacks.set("__gc", onGarbageCollection);
 
 		state.newmetatable("__funkinMetaTable");
@@ -198,6 +209,10 @@ class LuaScript extends Script {
 
 		state.pushstring('__call');
 		state.pushcfunction(Callable.fromStaticFunction(__call));
+		state.settable(-3);
+
+		state.pushstring('__eq');
+		state.pushcfunction(Callable.fromStaticFunction(__eq));
 		state.settable(-3);
 
 		state.setglobal("__funkinMetaTable");
@@ -227,9 +242,9 @@ class LuaScript extends Script {
 			if (cl == null)
 				cl = Type.resolveClass('${realClassName}_HSC'); //It's an Abstract
 
-			// TODO: Enums 
+			var en = Type.resolveEnum(realClassName);
 
-			if (cl == null) {
+			if (cl == null && en == null) {
 				if(splitName.length > 1) {
 					splitName.splice(-2, 1); // Remove the last last item
 					realName = splitName.join(".");
@@ -239,17 +254,36 @@ class LuaScript extends Script {
 					cl = Type.resolveClass(realClassName);
 					if (cl == null)
 						cl = Type.resolveClass('${realClassName}_HSC');
+
+					en = Type.resolveEnum(realClassName);
 				}
 			}
 
-			if (cl == null) {
+			if (cl == null && en == null) {
 				error('Unknown Class $oldName');
-				return null;
+				return;
 			}
 
-			set(toSet, cl);
-
-			return null;
+			if(en != null) {
+				var luaEnum = {};
+				for (c in en.getConstructors()) {
+					try {
+						Reflect.setField(luaEnum, c, en.createByName(c));
+					}
+					catch (e) {
+						try {
+							Reflect.setField(luaEnum, c, Reflect.field(en, c));
+						}
+						catch (ex) {
+							this.error(Std.string(e));
+							return;
+						}
+					}
+				}
+				set(toSet, luaEnum);
+			}
+			else
+				set(toSet, cl);
 		});
 	}
 
@@ -289,15 +323,14 @@ class LuaScript extends Script {
 	}
 
 	override function get(variable:String):Dynamic {
-		/*
 		if (state == null)
 			return super.get(variable);
+
+		state.settop(0);
 		state.getglobal(variable);
-		var r = fromLua(-1);
-		state.pop(1);
+		var r = fromLua(state.gettop());
+		state.settop(0);
 		return r;
-		*/
-		return null;
 	}
 
 	override function set(variable:String, value:Dynamic) {
@@ -306,10 +339,6 @@ class LuaScript extends Script {
 
 		if(value is Class) 
 			setClassPointer(value);
-		/*
-		else if(value is Enum)
-			setEnumPointer(value);
-		*/
 		else
 			pushArg(value);
 		state.setglobal(variable);
@@ -435,10 +464,6 @@ class LuaScript extends Script {
 		assignPointer(new LuaClass(val));
 	}
 
-	private function setEnumPointer(val:Enum<Dynamic>) {
-		//assignPointer(new LuaClass(val));
-	}
-
 	private function assignPointer(val:OneOfTwo<LuaClass, Dynamic>) {
 		var p:StackPointer = {
 			__stack_id: lastStackID++,
@@ -491,11 +516,19 @@ class LuaScript extends Script {
 		return null;
 
 	private function pointerCall(args:Array<Dynamic>) {
-		//trace("calling");
 		var obj = args.shift(); // Retrieves the referenced object
 		if (obj != null && Reflect.isFunction(obj))
 			return Reflect.callMethod(null, obj, args);
 		return null;
+	}
+
+	private function onPointerEqual(a:Dynamic, b:Dynamic) {
+		if (Reflect.isEnumValue(a) && Reflect.isEnumValue(b))
+			return Type.enumEq(a, b);
+		else if ((a != null && a is hscript.HEnum.HEnumValue) && (b != null && b is hscript.HEnum.HEnumValue))
+			return cast(a, hscript.HEnum.HEnumValue).compare(cast(b, hscript.HEnum.HEnumValue));
+		
+		return a == b;
 	}
 
 	public function onGarbageCollection(obj:Dynamic) {
@@ -630,10 +663,54 @@ final class LuaClass implements LuaAccess {
 		return null;
 	}
 }
+/* WIP
+final class LuaFunction extends LuaCallback{
 
-typedef StackPointer =  {
-	var __stack_id:Int;
+	public var fn(default, null):haxe.Constraints.Function;
+
+	private var luaScript:LuaScript;
+	private var failed:Bool = false;
+
+	public function new(luaScript:LuaScript, ref:Int) {
+		this.luaScript = luaScript;
+		super(luaScript.state, ref);
+
+		fn = Reflect.makeVarArgs((args) -> return this.returnCall(args));
+	}
+
+	override function call(args:Array<Dynamic> = null) {
+		l.rawgeti(Lua.LUA_REGISTRYINDEX, this.ref);
+		if(l.type(-1) != Lua.LUA_TFUNCTION) 
+			return;
+		
+		if (args == null) args = [];
+		for (k => val in args)
+			luaScript.pushArg(val);
+
+		if (l.pcall(args.length, 1, 0) != 0) {
+			luaScript.error('Error on callback: ${l.tostring(-1)}');
+			failed = true;
+		}
+	}
+
+	public function returnCall(?args:Array<Dynamic>):Dynamic {
+		try {
+			this.call(args);
+			if (failed) {
+				failed = false;
+				return null;
+			}
+			var r = luaScript.fromLua(l.gettop());
+			return r;
+		}
+		catch(e) {
+			trace(Std.string(e));
+		}
+		return null;
+		
+	}
 }
+*/
 #else
-typedef LuaScript = DummyScript;
+class LuaScript extends DummyScript {}
 #end

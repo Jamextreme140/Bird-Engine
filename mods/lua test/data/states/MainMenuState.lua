@@ -8,6 +8,9 @@ local bpm
 
 local spr -- FlxSprite
 local chrom -- CustomShader
+local sprTween
+
+local vars
 
 function new()
 	print('"new" constructor')
@@ -24,7 +27,10 @@ function postCreate()
 	spr.updateHitbox()
 	add(spr)
 
-	FlxTween.tween(spr, {x = posX + 100}, (60/bpm), {ease = FlxEase.circInOut, type = FlxTween.PINGPONG})
+	sprTween = FlxTween.tween(spr, {x = posX + 100}, (60/bpm), {
+		ease = FlxEase.circInOut,
+		type = FlxTween.PINGPONG
+	})
 
 	chrom = CustomShader.new('chromaticAberration')
 	FlxG.camera.addShader(chrom)
