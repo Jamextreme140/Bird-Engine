@@ -119,6 +119,10 @@ class LuaScript extends Script {
 		];
 	}
 
+	private static final importRedirects:Map<String, String> = Script.getDefaultImportRedirects();
+	private static function getImportRedirect(clsName:String):String
+		return importRedirects.exists(clsName) ? importRedirects.get(clsName) : clsName;
+
 	public var state(default, null):State;
 	/**
 	 * Do not edit directly, use `addCallback` and `removeCallback` instead.
@@ -217,9 +221,11 @@ class LuaScript extends Script {
 
 			// TODO: variable exists check
 
-			var cl = Type.resolveClass(realName);
+			var realClassName = getImportRedirect(realName);
+
+			var cl = Type.resolveClass(realClassName);
 			if (cl == null)
-				cl = Type.resolveClass('${realName}_HSC'); //It's an Abstract
+				cl = Type.resolveClass('${realClassName}_HSC'); //It's an Abstract
 
 			// TODO: Enums 
 
@@ -228,9 +234,11 @@ class LuaScript extends Script {
 					splitName.splice(-2, 1); // Remove the last last item
 					realName = splitName.join(".");
 
-					cl = Type.resolveClass(realName);
+					realClassName = getImportRedirect(realName);
+
+					cl = Type.resolveClass(realClassName);
 					if (cl == null)
-						cl = Type.resolveClass('${realName}_HSC');
+						cl = Type.resolveClass('${realClassName}_HSC');
 				}
 			}
 
@@ -315,8 +323,7 @@ class LuaScript extends Script {
 	public override function setPublicMap(map:Map<String, Dynamic>) {
 		if(map.empty()) return;
 		for(k => v in map)
-			if(!Reflect.isFunction(v))
-				set(k, v);
+			set(k, v);
 	}
 
 	override function reload() {
@@ -453,6 +460,8 @@ class LuaScript extends Script {
 				return cast(obj, LuaAccess).get(key);
 			else if (obj is hscript.IHScriptCustomBehaviour)
 				return cast(obj, hscript.IHScriptCustomBehaviour).hget(key);
+			else if (obj is hscript.Property) // if the variable is a public hscript variable
+				return cast(obj, hscript.Property).callGetter(key);
 			else
 				return Reflect.getProperty(obj, key);
 		}
@@ -469,6 +478,8 @@ class LuaScript extends Script {
 				return cast(obj, LuaAccess).set(key, val);
 			else if (obj is hscript.IHScriptCustomBehaviour)
 				cast(obj, hscript.IHScriptCustomBehaviour).hset(key, val);
+			else if (obj is hscript.Property) // if the variable is a public hscript variable
+				return cast(obj, hscript.Property).callSetter(key, val);
 			else
 				Reflect.setProperty(obj, key, val);
 		}
