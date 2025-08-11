@@ -20,7 +20,7 @@ class VariationCreationScreen extends SongCreationScreen {
 		cast(songNameTextBox.members[songNameTextBox.members.length - 1], UIText).text = translateMeta("variation");
 
 		cast(importIdTextBox.members[importIdTextBox.members.length - 1], UIText).applyMarkup(
-			translate("variation"),
+			translateMeta("variation"),
 			[new FlxTextFormatMarkerPair(new FlxTextFormat(0xFFAD1212), "$")]
 		);
 
@@ -39,6 +39,8 @@ class VariationCreationScreen extends SongCreationScreen {
 		meta.variant = meta.name;
 		meta.vocalsSuffix = meta.instSuffix = '-${meta.variant}';
 		meta.name = parentMeta.name;
+		meta.icon = parentMeta.icon;
+		meta.color = parentMeta.color;
 		return super.formatMeta(meta);
 	}
 }

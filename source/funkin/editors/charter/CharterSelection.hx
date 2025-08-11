@@ -41,7 +41,7 @@ class CharterSelectionScreen extends EditorTreeMenuScreen {
 
 		for (d in s.difficulties) if (d != '') screen.add(makeChartOption(d, isVariant ? s.variant : null, s.name));
 		screen.add(new Separator());
-		if (s.variants != null) for (v in s.variants) if (s.metas.get(v) != null) screen.add(makeVariationOption(s.metas.get(v)));
+		for (v in s.variants) if (s.metas.get(v) != null) screen.add(makeVariationOption(s.metas.get(v)));
 
 		#if sys
 		screen.insert(0, new NewOption(getID('newDifficulty'), getID('newDifficultyDesc'), () -> {
@@ -90,7 +90,7 @@ class CharterSelectionScreen extends EditorTreeMenuScreen {
 			return;
 		}
 
-		var songFolder:String = '${Paths.getAssetsRoot()}/songs/${creation.meta.name}';
+		var songFolder:String = '${Paths.getAssetsRoot()}/songs/${variant != null && curSong != null ? curSong.name : creation.meta.name}';
 
 		#if sys
 		// Make Directories
@@ -114,6 +114,7 @@ class CharterSelectionScreen extends EditorTreeMenuScreen {
 		if (variant != null && curSong != null) {
 			if (curSong.variants == null) curSong.variants = [];
 			if (!curSong.variants.contains(variant)) curSong.variants.push(variant);
+
 			curSong.metas.set(variant, creation.meta);
 
 			parent.tree.last().add(makeVariationOption(creation.meta));

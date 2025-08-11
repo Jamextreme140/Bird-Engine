@@ -98,14 +98,22 @@ class Chart {
 		data.setFieldDefault("needsVoices", true);
 		data.setFieldDefault("difficulties", []);
 		data.setFieldDefault("variants", []);
+		data.setFieldDefault("metas", []);
 
 		return data;
 	}
 
-	public static function loadChartMeta(songName:String, ?variant:String, fromMods:Bool = true, includeMetaVariations = true):ChartMetaData {
-		var defaultPath = Paths.file('songs/$songName/meta.json'), isVariant = false;
-		var data:ChartMetaData = null, paths = (variant == null || variant == '') ? [defaultPath] : [Paths.file('songs/$songName/meta-$variant.json'), defaultPath];
-		for (path in paths) if (Assets.exists(path)) {
+	public static function loadChartMeta(songName:String, ?variant:String, ?difficulty:String, fromMods:Bool = true, includeMetaVariations = true):ChartMetaData {
+		var folder = 'songs/$songName', isVariant = false, data:ChartMetaData = null;
+		var defaultPaths = [Paths.file('$folder/meta-$difficulty.json'), Paths.file('$folder/meta.json')], variantPaths = [];
+		if (difficulty != null) defaultPaths.unshift(Paths.file('$folder/meta-$difficulty.json'));
+
+		if (variant != null && variant != '') {
+			variantPaths.push(Paths.file('$folder/meta-$variant.json'));
+			if (difficulty != null) variantPaths.unshift(Paths.file('$folder/meta-$variant-$difficulty.json'));
+		}
+
+		for (path in variantPaths.concat(defaultPaths)) if (Assets.exists(path)) {
 			fromMods = Paths.assetsTree.existsSpecific(path, "TEXT", MODS);
 			try {
 				var tempData = Json.parse(Assets.getText(path));
@@ -114,7 +122,7 @@ class Chart {
 			} catch(e) Logs.trace('Failed to load song metadata for $songName ($path): ${Std.string(e)}', ERROR);
 
 			if (data != null) {
-				isVariant = path != defaultPath;
+				isVariant = variantPaths.contains(path);
 				break;
 			}
 		}
@@ -148,8 +156,10 @@ class Chart {
 
 		data.metas = [];
 		if (includeMetaVariations && data.variants.length > 0) for (variant in data.variants) {
-			if (!data.metas.exists(variant) && Assets.exists(Paths.file('songs/$songName/meta-$variant.json')))
-				data.metas.set(variant, loadChartMeta(songName, variant, fromMods));
+			if (!data.metas.exists(variant) && Assets.exists(Paths.file('songs/$songName/meta-$variant.json'))) {
+				var meta = loadChartMeta(songName, variant, fromMods);
+				if (meta.variant != null) data.metas.set(variant, meta);
+			}
 		}
 
 		return data;
@@ -268,9 +278,9 @@ class Chart {
 		var filteredChart = filterChartForSaving(chart, saveSettings.saveMetaInChart, saveSettings.saveLocalEvents, saveSettings.saveGlobalEvents && saveSettings.seperateGlobalEvents != true);
 
 		#if sys
-		var songPath = saveSettings.songFolder == null ? 'assets/songs/${chart.meta.name}' : saveSettings.songFolder, variantSuffix = variant != null && variant != "" ? '-$variant' : "";
+		var songPath = saveSettings.songFolder == null ? 'songs/${chart.meta.name}' : saveSettings.songFolder, variantSuffix = variant != null && variant != "" ? '-$variant' : "";
 		var metaPath = 'meta$variantSuffix.json', prettyPrint = saveSettings.prettyPrint == true ? Flags.JSON_PRETTY_PRINT : null, temp:String;
-		if ((temp = Paths.assetsTree.getPath('$songPath/$metaPath')) != null) {
+		if ((temp = Paths.assetsTree.getPath('assets/$songPath/$metaPath')) != null) {
 			songPath = temp.substr(0, temp.length - metaPath.length - 1);
 			metaPath = temp;
 		}

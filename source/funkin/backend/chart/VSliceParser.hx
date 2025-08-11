@@ -177,12 +177,12 @@ class VSliceParser {
 		var songID:String = songID == null ? songName.toLowerCase().replace(" ", "-") : songID;
 		var firstTimeChange:SwagTimeChange = data.timeChanges[0];
 
-		result.name = songID;
 		result.bpm = firstTimeChange.bpm.getDefault(Flags.DEFAULT_BPM);
 		result.beatsPerMeasure = firstTimeChange.n.getDefault(Flags.DEFAULT_BEATS_PER_MEASURE);
 		result.stepsPerBeat = firstTimeChange.d.getDefault(Flags.DEFAULT_STEPS_PER_BEAT);
 		result.displayName = songName;
-		result.difficulties = data.playData.difficulties.concat(data.playData.songVariations.getDefault([]));
+		result.difficulties = data.playData.difficulties.copy();
+		if (data.playData.songVariations != null) result.variants = data.playData.songVariations.copy();
 
 		if (result.customValues == null) result.customValues = {};
 		result.customValues.artist = data.artist;

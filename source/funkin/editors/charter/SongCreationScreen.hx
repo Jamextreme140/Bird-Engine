@@ -3,6 +3,7 @@ package funkin.editors.charter;
 import flixel.group.FlxGroup;
 import flixel.text.FlxText.FlxTextFormat;
 import flixel.text.FlxText.FlxTextFormatMarkerPair;
+import funkin.backend.chart.Chart;
 import funkin.backend.chart.ChartData;
 import funkin.backend.chart.FNFLegacyParser.SwagSong;
 import funkin.backend.chart.PsychParser;
@@ -245,7 +246,7 @@ class SongCreationScreen extends UISubstateWindow {
 			var pages = isImporting ? importPages : pages;
 			if (curPage == pages.length-1) {
 				saveSongInfo();
-				close();
+				if (subState == null) close();
 			} else {
 				curPage++;
 				refreshPages();
@@ -296,7 +297,7 @@ class SongCreationScreen extends UISubstateWindow {
 
 			if (curPage == 1) {
 				importInstExplorer.selectable = importVoicesExplorer.selectable = !project;
-				saveButton.selectable = project ? true : (importInstExplorer.file != null);
+				saveButton.selectable = #if TEST_BUILD true #else project ? true : (importInstExplorer.file != null) #end;
 			} else if (curPage == 2) {
 				importIdTextBox.selectable = !project;
 				importChartFile.fileType = project ? "fnfc" : "json";
@@ -358,7 +359,7 @@ class SongCreationScreen extends UISubstateWindow {
 
 	// for variations
 	function formatMeta(meta:ChartMetaData):ChartMetaData
-		return funkin.backend.chart.Chart.defaultChartMetaFields(meta);
+		return Chart.defaultChartMetaFields(meta);
 
 	function getChartSavePath(meta:ChartMetaData, diff:String):String
 		return 'charts/${meta.variant != null && meta.variant != "" ? meta.variant + "/" : ""}$diff.json';
@@ -386,7 +387,7 @@ class SongCreationScreen extends UISubstateWindow {
 					saveFromVSlice(files, songId);
 				default /*"Psych/Legacy FNF"*/:
 					var songId = importIdTextBox.label.text;
-					var oldChart:SwagSong = Json.parse(cast importChartFile.file);
+					var oldChart:SwagSong = Chart.cleanSongData(Json.parse(cast importChartFile.file));
 					var base:ChartData = {
 						strumLines: [],
 						noteTypes: [],
@@ -415,6 +416,7 @@ class SongCreationScreen extends UISubstateWindow {
 						#end
 					});
 			} catch (e:haxe.Exception) {
+				trace(e.stack, e.message);
 				openSubState(new UIWarningSubstate("Importing Song/Charts: Error!", e.details(), [
 					{label: "Ok", color: 0xFFFF0000, onClick: function(t) {}}
 				]));
@@ -450,7 +452,7 @@ class SongCreationScreen extends UISubstateWindow {
 		var vslicechart:NewSwagSong = Json.parse(files.get('${songId}-chart.json'));
 		var playData = vslicemeta.playData;
 
-		var meta:ChartMetaData = formatMeta({name: songId});
+		var meta:ChartMetaData = formatMeta({name: songId, needsVoices: files.get('Voices.${Flags.SOUND_EXT}') != null});
 		var diffCharts:Array<ChartDataWithInfo> = [], events:Array<ChartEvent> = null;
 		VSliceParser.parse(vslicemeta, vslicechart, meta, diffCharts, songId);
 
