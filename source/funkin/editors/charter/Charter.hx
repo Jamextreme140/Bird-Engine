@@ -44,6 +44,7 @@ class Charter extends UIState {
 		return FlxG.state is Charter ? cast FlxG.state : null;
 
 	public var charterBG:FunkinSprite;
+	public var charterBookmarksGroup:FlxTypedGroup<FlxSprite> = new FlxTypedGroup<FlxSprite>();
 	public var uiGroup:FlxTypedGroup<FlxSprite> = new FlxTypedGroup<FlxSprite>();
 
 	public var topMenu:Array<UIContextMenuOption>;
@@ -462,7 +463,7 @@ class Charter extends UIState {
 		noteHoverer = new CharterNoteHoverer();
 		noteDeleteAnims = new CharterDeleteAnim();
 
-		selectionBox.cameras = notesGroup.cameras = gridBackdrops.cameras =
+		charterBookmarksGroup.cameras = selectionBox.cameras = notesGroup.cameras = gridBackdrops.cameras =
 		noteHoverer.cameras = noteDeleteAnims.cameras = [charterCamera];
 
 		topMenuSpr = new UITopMenu(topMenu);
@@ -551,6 +552,7 @@ class Charter extends UIState {
 		add(noteDeleteAnims);
 		add(notesGroup);
 		add(selectionBox);
+		add(charterBookmarksGroup);
 		add(strumlineInfoBG);
 		add(strumlineLockButton);
 		add(strumlineAddButton);
@@ -571,6 +573,8 @@ class Charter extends UIState {
 
 		if (Options.editorsResizable)
 			UIState.setResolutionAware();
+
+		updateBookmarks(); //recalling it to fix resolutions
 
 		// ! IF YOU EVER WANNA VIEW IN THE FUTURE, JUST USE A FLXSPRITE :D -lunar
 		/*var dataDisplay:FlxSprite = new FlxSprite().loadGraphic(waveformHandler.waveDatas.get("Voices.ogg"));
@@ -1841,6 +1845,22 @@ class Charter extends UIState {
 		Conductor.songPosition = FlxG.sound.music.length;
 	}
 
+	function _opponent_camera_add(_) addEventAtCurrentStep("Camera Movement", [0], !FlxG.keys.pressed.ALT, !FlxG.keys.pressed.SHIFT);
+	function _player_camera_add(_) addEventAtCurrentStep("Camera Movement", [1], !FlxG.keys.pressed.ALT, !FlxG.keys.pressed.SHIFT);
+
+	function addEventAtCurrentStep(name:String, params:Array<Dynamic>, shouldGlobal:Bool = true, shouldQuant:Bool = false) {
+		var step:Float = (shouldQuant ? quantStep(curStepFloat) : curStepFloat);
+		var __event:CharterEvent = new CharterEvent(step, [{
+			name: name,
+			params: params,
+			time: Conductor.getTimeForStep(step)
+		}], shouldGlobal);
+
+		__event.refreshEventIcons();
+		(__event.global ? rightEventsGroup : leftEventsGroup).add(__event);
+		undos.addToUndo(CEditEvent(__event, [], __event.events));
+	}
+
 	public function getBookmarkList():Array<ChartBookmark> {
 		var bookmarks:Array<ChartBookmark> = [];
 		try {
@@ -1849,34 +1869,6 @@ class Charter extends UIState {
 		} catch (e) {}
 		
 		return bookmarks;
-	}
-
-		function _opponent_camera_add(_) {
-		var __event:CharterEvent = null;
-
-				__event = new CharterEvent(curStepFloat, [{
-				name: "Camera Movement",
-				params:[0],
-				time: Conductor.getTimeForStep(curStepFloat)
-			}], true);
-				__event.refreshEventIcons();
-				__event.global = true;
-				rightEventsGroup.add(__event);
-				undos.addToUndo(CEditEvent(__event, [], __event.events));
-			
-	}
-		function _player_camera_add(_) {
-		var __event:CharterEvent = null;
-
-				__event = new CharterEvent(curStepFloat, [{
-				name: "Camera Movement",
-				params:[1],
-				time: Conductor.getTimeForStep(curStepFloat)
-			}], true);
-				__event.refreshEventIcons();
-				rightEventsGroup.add(__event);
-				undos.addToUndo(CEditEvent(__event, [], __event.events));
-			
 	}
 
 	function _bookmarks_add(_) {
@@ -1900,6 +1892,7 @@ class Charter extends UIState {
 			}));
 		}
 	}
+
 	function _bookmarks_edit_list(_)
 		FlxG.state.openSubState(new CharterBookmarkList()); //idk why its FlxG.state but it looks so off lmfao
 
@@ -1915,12 +1908,12 @@ class Charter extends UIState {
 			if (bars != null) {
 				for (spr in bars) {
 					if (spr == null) continue;
-					remove(spr);
+					charterBookmarksGroup.remove(spr);
 					spr.kill();
 				}
 			}
 			if (text != null) {
-				remove(text);
+				charterBookmarksGroup.remove(text);
 				text.kill();
 			}
 		}
@@ -1941,15 +1934,13 @@ class Charter extends UIState {
 			{
 				var bookmarkspr = new FlxSprite(str.x, (b.time * 40)).makeSolid(str.keyCount * 40, 4, bookmarkcolor);
 				bookmarkspr.updateHitbox();
-				bookmarkspr.camera = charterCamera;
-				add(bookmarkspr);
+				charterBookmarksGroup.add(bookmarkspr);
 				sprites.push(bookmarkspr);
 			}
 
 			var bookmarkText = new UIText(strumLines.members[0].x + 4, 0, 400, b.name, 15, bookmarkcolor, true);
 			bookmarkText.y = sprites[0].y - (bookmarkText.height + 2);
-			bookmarkText.camera = charterCamera;
-			add(bookmarkText);
+			charterBookmarksGroup.add(bookmarkText);
 
 			if (luminance < 0.5)
 				bookmarkText.borderColor = 0x88FFFFFF;
@@ -1993,12 +1984,12 @@ class Charter extends UIState {
 			null,
 			{
 				label: translate("song.addOpponentCamera"),
-				keybind: [O],
+				keybinds: [[O], [O, SHIFT], [O, ALT]],
 				onSelect: _opponent_camera_add
 			},
 			{
 				label: translate("song.addPlayerCamera"),
-				keybind: [P],
+				keybinds: [[P], [P, SHIFT], [P, ALT]],
 				onSelect: _player_camera_add
 			},
 			null,

@@ -90,7 +90,11 @@ class MainState extends FlxState {
 				else _noPriorityAddons.insert(0, data);
 			}
 		}
+		#end
 
+		funkin.backend.scripting.Script.staticVariables.clear();
+
+		#if MOD_SUPPORT
 		for (addon in _lowPriorityAddons)
 			loadLib(addon.path, ltrim(addon.name, "[LOW]"));
 
