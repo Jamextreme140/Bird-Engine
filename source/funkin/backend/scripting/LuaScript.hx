@@ -177,6 +177,8 @@ class LuaScript extends Script {
 
 	public var hscript(default, null):LuaHScript;
 
+	var __importedPaths:Array<String>;
+
 	public function new(path:String) {
 		super(path);
 		setDefaultCallbacks();
@@ -188,6 +190,8 @@ class LuaScript extends Script {
 		state = LuaL.newstate();
 		state.openlibs();
 		state.register_hxtrace_lib();
+
+		__importedPaths = [path];
 
 		onPointerCall = Reflect.makeVarArgs(pointerCall);
 
@@ -234,7 +238,8 @@ class LuaScript extends Script {
 			var oldName = realName;
 			var oldSplitName = splitName.copy();
 
-			// TODO: variable exists check
+			if(__importedPaths.contains(realName))
+				return;
 
 			var realClassName = getImportRedirect(realName);
 
@@ -280,10 +285,13 @@ class LuaScript extends Script {
 						}
 					}
 				}
+				__importedPaths.push(realName);
 				set(toSet, luaEnum);
 			}
-			else
+			else {
+				__importedPaths.push(realName);
 				set(toSet, cl);
+			}
 		});
 	}
 
@@ -364,7 +372,7 @@ class LuaScript extends Script {
 		super.destroy();
 	}
 
-	public function resolveCallback(id:String):haxe.Constraints.Function {
+	public function resolveCallback(id:String):Dynamic {
 		if (id == null)
 			return null;
 		id = StringTools.trim(id);
@@ -498,6 +506,14 @@ class LuaScript extends Script {
 		if (key == "__gc")
 			return null;
 
+		switch(Type.typeof(obj)) {
+			case TNull: return null;
+			case TUnknown: 
+				trace('unknown object!');
+				return null;
+			default:
+		}
+
 		if (obj != null) {
 			if (obj is LuaAccess)
 				return cast(obj, LuaAccess).set(key, val);
@@ -505,8 +521,10 @@ class LuaScript extends Script {
 				cast(obj, hscript.IHScriptCustomBehaviour).hset(key, val);
 			else if (obj is hscript.Property) // if the variable is a public hscript variable
 				return cast(obj, hscript.Property).callSetter(key, val);
-			else
+			else {
 				Reflect.setProperty(obj, key, val);
+				return val;
+			}	
 		}
 
 		return null;
