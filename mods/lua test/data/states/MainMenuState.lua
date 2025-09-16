@@ -31,6 +31,7 @@ function postCreate()
 		ease = FlxEase.circInOut,
 		type = FlxTween.PINGPONG
 	})
+	print(sprTween.duration)
 
 	chrom = CustomShader.new('chromaticAberration')
 	FlxG.camera.addShader(chrom)
