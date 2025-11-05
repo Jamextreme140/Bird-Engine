@@ -318,7 +318,7 @@ class AudioBuffer
 		audioBuffer.channels = info.channels;
 		audioBuffer.sampleRate = info.rate;
 		audioBuffer.bitsPerSample = 16;
-		
+
 		if (!vorbisFile.seekable() ||
 			vorbisFile.pcmTotal() < #if lime_cffi @:privateAccess lime._internal.backend.native.NativeAudioSource.STREAM_BUFFER_SAMPLES #else 0x4000 #end)
 		{
@@ -334,8 +334,7 @@ class AudioBuffer
 
 			audioBuffer.data = new UInt8Array(bytes);
 		}
-		else 
-			audioBuffer.__srcVorbisFile = vorbisFile;
+		else audioBuffer.__srcVorbisFile = vorbisFile;
 
 		return audioBuffer;
 	}

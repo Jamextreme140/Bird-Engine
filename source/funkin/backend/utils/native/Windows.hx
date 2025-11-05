@@ -194,6 +194,7 @@ final class Windows {
 	')
 	public static function setWindowIcon(path:String) {}
 
+
 	@:functionCode('
 	// https://stackoverflow.com/questions/15543571/allocconsole-not-displaying-cout
 

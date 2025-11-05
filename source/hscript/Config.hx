@@ -7,7 +7,6 @@ class Config {
 		"flixel",
 
 		"funkin",
-
 		#if MODCHARTING_FEATURES
 		"modchart.engine",
 		"modchart.backend.standalone",
