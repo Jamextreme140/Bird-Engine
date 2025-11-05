@@ -162,6 +162,7 @@ class Main extends Sprite
 		FlxG.signals.focusGained.add(onFocus);
 		FlxG.signals.preStateSwitch.add(onStateSwitch);
 		FlxG.signals.postStateSwitch.add(onStateSwitchPost);
+		FlxG.signals.postUpdate.add(onUpdate);
 
 		FlxG.mouse.useSystemCursor = true;
 		#if DARK_MODE_WINDOW
