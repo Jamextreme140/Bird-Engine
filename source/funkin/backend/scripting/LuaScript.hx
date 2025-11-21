@@ -663,7 +663,7 @@ final class LuaClass implements LuaAccess {
 
 			fieldMap.array();
 		};
-		__constructor = Reflect.makeVarArgs((args) -> Type.createInstance(__class, args));
+		__constructor = Reflect.makeVarArgs((args) -> return Type.createInstance(__class, args));
 	}
 
 	public function get(name:String):Dynamic {
