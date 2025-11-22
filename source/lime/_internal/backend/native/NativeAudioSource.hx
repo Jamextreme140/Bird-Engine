@@ -387,9 +387,9 @@ class NativeAudioSource {
 				wasEOF = false;
 			}
 		}
-		catch (e:Dynamic) {
-			trace(e);
-			result = -1;
+		catch (e:haxe.Exception) {
+			trace('NativeAudioSource readToBufferData Bug! error: ${e.message} | ${e.stack}, streamEnded: $streamEnded, total: $total, n: $n');
+			return result;
 		}
 
 		if (result < 0) {
@@ -444,21 +444,25 @@ class NativeAudioSource {
 			for (i in (STREAM_MAX_BUFFERS - queuedBuffers)...STREAM_MAX_BUFFERS)
 				if (sec >= (bufferTime = bufferTimes[i]) && sec < bufferTime + (bufferLengths[i] / wordSize / channels / sampleRate))
 			{
+				#if audio_stream_async streamMutex.acquire(); #end
 				skipBuffers(i - STREAM_MAX_BUFFERS + queuedBuffers);
-				fillBuffers(STREAM_MIN_BUFFERS - STREAM_MAX_BUFFERS + i);
 				AL.sourcei(source, AL.SAMPLE_OFFSET, Math.floor((sec - bufferTime) * sampleRate));
+				fillBuffers(STREAM_MIN_BUFFERS - STREAM_MAX_BUFFERS + i);
+				#if audio_stream_async streamMutex.release(); #end
 				return flushBuffers();
 			}
 		}
 
 		AL.sourceUnqueueBuffers(source, AL.getSourcei(source, AL.BUFFERS_QUEUED));
 
+		#if audio_stream_async streamMutex.acquire(); #end
 		streamEnded = false;
 		streamSeek(Int64.fromFloat(sec * sampleRate));
 
 		requestBuffers = queuedBuffers = streamLoops = nextBuffer = 0;
 		fillBuffers(STREAM_MIN_BUFFERS);
 		flushBuffers();
+		#if audio_stream_async streamMutex.release(); #end
 	}
 
 	#if audio_stream_async
@@ -466,18 +470,17 @@ class NativeAudioSource {
 		var i:Int, source:NativeAudioSource, process:Int;
 
 		while ((i = Thread.readMessage(true)) != 0) {
-			streamMutex.acquire();
-
 			while (i-- > 0) {
-				if ((source = streamSources[i]).parent.buffer == null || source.parent.buffer.__srcVorbisFile == null) {
+				if ((source = streamSources[i]).parent.buffer == null) {
 					source.stopStream();
 					continue;
 				}
+				streamMutex.acquire();
 				process = source.requestBuffers < STREAM_MIN_BUFFERS ? STREAM_MIN_BUFFERS - source.requestBuffers : 0;
 				source.fillBuffers(STREAM_PROCESS_BUFFERS > process ? STREAM_PROCESS_BUFFERS : process);
+				streamMutex.release();
 			}
 
-			streamMutex.release();
 		}
 
 		threadRunning = false;
