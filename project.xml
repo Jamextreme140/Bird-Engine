@@ -241,4 +241,6 @@
 
 	<!-- EXPERMENTAL FEATURES -->
 	<haxedef name="EXPERIMENTAL_FLXGRAPHIC_DESTROY_FIX" />
+	<haxedef name="audio_stream_async" unless="web" />
+
 </project>
