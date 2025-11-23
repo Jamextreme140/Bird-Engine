@@ -411,6 +411,16 @@ class LuaScript extends Script {
 			case Lua.LUA_TTABLE:
 				ret = toHaxeObj(stackPos);
 			case Lua.LUA_TFUNCTION:
+				/*
+				var ref = new llua.LuaCallback(state, state.ref(Lua.LUA_REGISTRYINDEX));
+				ret = Reflect.makeVarArgs((args) -> {
+					ref.call(args);
+					var v = fromLua(state.gettop());
+        			state.settop(0);
+					ref.dispose();
+        			return v;
+				});
+				*/
 				null; // no support for functions yet
 			// case Lua.LUA_TUSERDATA:
 			// 	ret = LuaL.ref(l, Lua.LUA_REGISTRYINDEX);
