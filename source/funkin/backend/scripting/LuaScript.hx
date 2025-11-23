@@ -336,6 +336,8 @@ class LuaScript extends Script {
 
 		state.settop(0);
 		state.getglobal(variable);
+		if (state.type(-1) == Lua.LUA_TFUNCTION)
+			return null;
 		var r = fromLua(state.gettop());
 		state.settop(0);
 		return r;
@@ -530,8 +532,7 @@ class LuaScript extends Script {
 		return null;
 	}
 
-	public dynamic function onPointerCall(args:Array<Dynamic>):Dynamic
-		return null;
+	private var onPointerCall:Dynamic = null;
 
 	private function pointerCall(args:Array<Dynamic>) {
 		var obj = args.shift(); // Retrieves the referenced object
