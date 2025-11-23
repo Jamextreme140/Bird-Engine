@@ -671,14 +671,15 @@ class NativeAudioSource {
 					if (!streamEnded) resetStream();
 				}
 				if (AL.getSourcei(source, AL.SOURCE_STATE) != AL.PLAYING) AL.sourcePlay(source);
+				completeTimer = resetTimer(completeTimer, timeRemaining, timer_onRun);
 			}
 		}
 		else {
 			completed = timeRemaining < 8;
 			lastTime = value;
+			if (completeTimer != null) completeTimer.stop();
 		}
 
-		updateCompleteTimer();
 		return value;
 	}
 
