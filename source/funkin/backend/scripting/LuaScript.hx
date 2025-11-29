@@ -53,7 +53,7 @@ class LuaScript extends Script {
 		if (cbf == null || !Reflect.isFunction(cbf)) 
 			return 0;
 
-		final nparams:Int = Lua.gettop(l);
+		final nparams:Int = l.gettop();
 		final args:Array<Dynamic> = [
 			for (i in 0...nparams)
 				callbackPreventAutoConvert ? l.fromLua(-nparams + i) : curLua.fromLua(-nparams + i)
@@ -68,7 +68,7 @@ class LuaScript extends Script {
 			curLua.error(e.details()); // for super cool mega logging!!!
 			throw e;
 		}
-		Lua.settop(l, 0);
+		l.settop(0);
 
 		if (callbackReturnVariables.length <= 0)
 			callbackReturnVariables.push(ret);
@@ -637,8 +637,6 @@ final class LuaHScript extends HScript implements hscript.IHScriptCustomBehaviou
 		if (code != null && code.trim().length > 0) {
 			this.parser.line = 1;
 			this.loadFromString(code);
-			@:privateAccess
-			this.interp.execute(parser.mk(EBlock([]), 0, 0));
 			if (expr != null)
 				ret = interp.execute(expr);
 		}
