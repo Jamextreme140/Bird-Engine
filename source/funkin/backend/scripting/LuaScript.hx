@@ -9,6 +9,7 @@ import flixel.util.typeLimit.OneOfTwo;
 
 import haxe.ds.IntMap;
 import haxe.ds.StringMap;
+import haxe.ds.Either;
 import haxe.DynamicAccess;
 
 import llua.Lua;
@@ -347,10 +348,12 @@ class LuaScript extends Script {
 		if (state == null)
 			return;
 
+		/*
 		if(value is Class) 
 			setClassPointer(value);
 		else
-			pushArg(value);
+			*/
+		pushArg(value);
 		state.setglobal(variable);
 	}
 
@@ -477,17 +480,19 @@ class LuaScript extends Script {
 	}
 
 	private function setStackPointer(val:Dynamic) {
-		assignPointer(val);
+		var v:Dynamic = val is Class ? new LuaClass(val) : val;
+		assignPointer(v);
 	}
 
 	private function setClassPointer(val:Class<Dynamic>) {
 		assignPointer(new LuaClass(val));
 	}
 
-	private function assignPointer(val:OneOfTwo<LuaClass, Dynamic>) {
+	private function assignPointer(val:Dynamic) {
 		var p:StackPointer = {
 			__stack_id: lastStackID++,
 		};
+
 		state.toLua(p);
 		state.getmetatable("__funkinMetaTable");
 		state.setmetatable(-2);
@@ -496,7 +501,7 @@ class LuaScript extends Script {
 		state.pushcfunction(Callable.fromStaticFunction(__gc));
 		state.settable(-3);
 
-		stack.set(p.__stack_id, cast val);
+		stack.set(p.__stack_id, val);
 	}
 
 	public function onPointerIndex(obj:Dynamic, key:String) {
